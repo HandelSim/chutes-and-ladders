@@ -177,9 +177,103 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
 #seats .you{margin-left:0}
 #picks{grid-template-columns:1fr}
 [hidden]{display:none!important}
+/* ---- v2 ---- */
+.dir{opacity:.3;pointer-events:none}
+.dir .turn{stroke-width:5.5}
+.spin-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.spin-acts #spinBtn{flex:1 1 90px}
+#abBtn{display:flex;align-items:center;gap:6px;flex:1 1 140px;text-align:left;line-height:1.15}
+#abBtn .abic{font-size:18px}
+#abBtn .abtxt{display:flex;flex-direction:column;min-width:0}
+#abBtn #abName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#abBtn #abCost{font-size:11.5px;color:var(--muted);font-weight:600}
+.ab-why{flex-basis:100%;margin:0;color:var(--muted);font-size:12.5px}
+#pickRow{display:flex;gap:6px;align-items:center;flex-basis:100%}
+#pickRow button{min-width:48px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.chips:empty{display:none}
+.chips span{font:600 13px/1 Fredoka,system-ui,sans-serif;border:1px solid var(--line);border-radius:7px;padding:4px 7px;background:var(--bg)}
+.chips span.dim{opacity:.5;text-decoration:line-through}
+.chips span.keep{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.spin-card{flex-wrap:wrap}
+.turn-info{flex:1 1 150px}
+.pips{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}
+.pips i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--accent);display:inline-block}
+.pips i.on{background:var(--accent)}
+.pips.pulse{animation:pipPulse .7s ease 2}
+@keyframes pipPulse{50%{transform:scale(1.5)}}
+.shield-ic{margin-left:5px}
+.abtag{white-space:nowrap}
+.ab-banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:8px;
+  background:var(--panel);color:var(--ink);border:2px solid var(--accent);border-radius:999px;padding:6px 14px 6px 8px;
+  font:600 16px/1.2 Fredoka,system-ui,sans-serif;box-shadow:var(--shadow);max-width:92%;pointer-events:none}
+.ab-banner .ic{font-size:20px}
+.ab-banner.show{animation:pop .3s cubic-bezier(.2,1.4,.4,1)}
+.picker .grid button small.abl{font-size:11px;color:var(--muted);font-weight:600}
+.legend{margin:10px 0 4px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)}
+.legend summary{cursor:pointer;font-weight:600}
+.legend ul{margin:8px 0 0;padding-left:18px;font-size:13.5px}
+.legend li{margin:3px 0}
+.cpu-tog{flex:none;min-width:66px;padding:6px 8px;font-size:12.5px}
+.cpu-tog.human{background:var(--accent-soft);border-color:var(--accent)}
+#picks li button:first-child{display:flex;align-items:center;gap:8px}
+#picks li button.cpu-tog{flex:0 0 auto;width:auto;max-width:none;min-height:46px}
+#picks li input.name{flex:1 1 60px;min-width:0}
+#picks .who2{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+#picks .who2 b,#picks .who2 small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#picks .who2 small{color:var(--muted);font-size:11.5px;font-weight:600}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.opts .row{margin:0;flex-wrap:wrap}
+.opts .row + .row{margin-top:0}
+select{font:inherit;font-weight:600;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);min-height:40px}
+select:focus-visible,summary:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.boardinfo{margin:0;color:var(--muted);font-size:13px}
+details.help{font-size:13.5px;margin-top:10px}
+details.help summary{cursor:pointer;font-weight:600;color:var(--muted)}
+details.help p{margin:6px 0 0}
+.mg-sheet{width:min(600px,100%)}
+.mg-sheet .body{padding:12px 16px 16px}
+#mgIcon{font-size:26px}
+#mgClock{flex:none}
+.mg-lead{font:600 18px/1.3 Fredoka,system-ui,sans-serif;margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.mg-howto{margin:0 0 10px}
+.mg-reward{margin:10px 0 0;color:var(--muted);font-size:13.5px}
+.mg-players{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.mg-players li{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 4px;font-weight:600;font-size:13.5px}
+.mg-players li small{color:var(--muted);font-weight:600}
+.mg-players li.done{border-color:var(--accent);background:var(--accent-soft)}
+.mg-go{justify-content:center;margin-top:14px}
+.mg-count{font:700 64px/1 Fredoka,system-ui,sans-serif;text-align:center;margin:14px 0 4px;color:var(--accent)}
+.mg-clock-line{text-align:center;color:var(--muted);margin:12px 0 0;font-variant-numeric:tabular-nums}
+.mg-stage{width:100%;min-height:200px}
+.mg-results{width:100%;border-collapse:collapse;font-size:14px}
+.mg-results th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:4px}
+.mg-results td{padding:6px 4px;border-top:1px solid var(--line);vertical-align:middle}
+.mg-results td .av{width:24px;height:24px;vertical-align:middle}
+.mg-results tr.win td{background:var(--accent-soft);font-weight:700}
+.pill{position:fixed;top:12px;right:12px;z-index:40;border-radius:999px;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);
+  box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100vw - 24px);font-size:14px;padding:9px 16px}
+.footrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+#sgText{width:100%;min-height:110px;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical}
+.sg-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px;color:var(--muted);font-size:12.5px}
+#sgMsg{margin:8px 0 0;font-size:13.5px}
+#sgMsg.ok{color:var(--accent)}
+#sgMsg.err{color:#d1495b}
+#sgList{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+#sgList li{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;border-bottom:1px dashed var(--line);padding:4px 0;font-size:13.5px}
+#sgList .sg-t{flex:1;min-width:0;overflow-wrap:anywhere}
+#sgList small{flex-basis:100%;color:var(--muted)}
+.chip{font-size:11px;font-weight:700;border-radius:8px;padding:1px 7px;background:var(--line);color:var(--ink);text-transform:uppercase;letter-spacing:.4px;flex:none}
+.chip.st-live{background:#2a9d55;color:#fff}
+.chip.st-building{background:#f29e02;color:#1f1b17}
+.chip.st-rejected,.chip.st-failed{background:#d1495b;color:#fff}
+@media (prefers-reduced-motion:reduce){.pips.pulse,.ab-banner.show,.picker .sheet{animation:none}}
+@media (max-width:420px){.wrap{padding:14px 10px 30px}h1{font-size:25px}#spinner{width:96px;height:96px}#picks li button:first-child{flex-basis:44%}}
 </style>
 </head>
 <body>
+<button class="pill" id="updPill" hidden>New version available. Tap to update</button>
 <div class="wrap">
   <header>
     <h1>Chutes &amp; Ladders</h1>
@@ -189,6 +283,7 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   <div class="layout">
     <section class="board-wrap" aria-label="Game board">
       <svg id="board" viewBox="0 0 1000 1090" role="img" aria-label="Chutes and Ladders board, squares 1 to 100"></svg>
+      <div class="ab-banner" id="abBanner" role="status" hidden></div>
       <div class="banner" id="banner" hidden>
         <div class="box" role="dialog" aria-live="polite">
           <h3 id="winTitle"></h3>
@@ -219,11 +314,22 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
             </div>
           </div>
           <ul id="picks" aria-label="Player pieces"></ul>
+          <div class="opts">
+            <div class="row" id="boardRow">
+              <button id="rerollBtn" title="Make a new random layout">🎲 Re-roll board</button>
+              <button id="classicBtn" aria-pressed="false">Classic board</button>
+            </div>
+            <p class="boardinfo" id="boardInfo" aria-live="polite"></p>
+            <div class="row"><input type="checkbox" id="abilitiesChk" checked><label class="lbl grow" for="abilitiesChk">Character abilities</label></div>
+            <div class="row"><label class="lbl grow" for="miniSel">Minigame every</label>
+              <select id="miniSel"><option value="0">Off</option><option value="2">2 rounds</option><option value="3">3 rounds</option><option value="4">4 rounds</option><option value="5">5 rounds</option></select></div>
+          </div>
           <div class="row">
             <button id="shuffleBtn" title="Random characters for everyone">🎲 Shuffle</button>
             <button class="primary grow" id="startBtn">Start game</button>
           </div>
-          <p class="hint">Tap a piece to change the character. Type to rename a player.</p>
+          <p class="hint">Tap a piece to change the character. Type to rename. CPU seats play themselves; a Human seat waits for its Spin.</p>
+          <p class="err" id="localErr" role="alert"></p>
         </div>
 
         <div class="card">
@@ -236,7 +342,7 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
             <div class="top"><label class="lbl" for="interval">Time between turns</label><output id="intervalOut" for="interval">1.0 s</output></div>
             <input id="interval" type="range" min="0" max="5" step="0.1" value="1">
           </div>
-          <p class="hint"><kbd>Space</kbd> play / pause &nbsp; <kbd>→</kbd> step</p>
+          <p class="hint"><kbd>Space</kbd> play / pause (or spin on your turn) &nbsp; <kbd>→</kbd> step</p>
         </div>
       </div>
 
@@ -259,14 +365,24 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
             <button id="copyLink">Copy link</button>
           </div>
           <p class="hint" id="roomStatus"></p>
+          <p class="hint" id="roomRules"></p>
           <ul id="seats" aria-label="Players in this room"></ul>
           <div class="row" id="joinSeatRow"><input class="text name grow" id="seatName" maxlength="20" autocomplete="off" placeholder="Your name" aria-label="Your name"><button class="primary" id="joinSeat">Join</button></div>
-          <div class="row" id="spinRow" hidden><button class="primary grow big" id="spinBtn">Spin!</button></div>
           <div class="host" id="hostBox" hidden>
             <h2>Host controls</h2>
             <div class="row">
               <button class="primary grow" id="hostStart">Start game</button>
               <button class="grow" id="hostSpin" hidden>Spin for them</button>
+            </div>
+            <div class="opts" id="hostPre">
+              <div class="row">
+                <button id="hReroll" title="Make a new random layout">🎲 Re-roll board</button>
+                <button id="hClassic" aria-pressed="false">Classic board</button>
+              </div>
+              <p class="boardinfo" id="hBoardInfo" aria-live="polite"></p>
+              <div class="row"><input type="checkbox" id="hAbilities"><label class="lbl grow" for="hAbilities">Character abilities</label></div>
+              <div class="row"><label class="lbl grow" for="hMini">Minigame every</label>
+                <select id="hMini"><option value="0">Off</option><option value="2">2 rounds</option><option value="3">3 rounds</option><option value="4">4 rounds</option><option value="5">5 rounds</option></select></div>
             </div>
             <div class="interval">
               <div class="top"><label class="lbl" for="autoSpin">Auto-spin if a player waits</label><output id="autoSpinOut" for="autoSpin">off</output></div>
@@ -274,7 +390,7 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
             </div>
           </div>
           <div class="row"><button id="leaveRoom">Leave room</button></div>
-          <p class="err" id="roomErr"></p>
+          <p class="err" id="roomErr" role="alert"></p>
         </div>
       </div>
 
@@ -283,12 +399,20 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
         <div class="turn-info" aria-live="polite">
           <div class="who" id="who">Ready</div>
           <div class="what" id="what"></div>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="spin-acts" id="spinActs" hidden>
+          <button class="primary big" id="spinBtn">Spin!</button>
+          <button id="abBtn"><span class="abic" id="abIcon" aria-hidden="true"></span><span class="abtxt"><span id="abName"></span><span id="abCost"></span></span></button>
+          <div id="pickRow" hidden></div>
+          <p class="ab-why" id="abWhy"></p>
         </div>
       </div>
 
       <div class="card">
         <h2>Players</h2>
         <ol id="roster"></ol>
+        <details class="help"><summary>How abilities work</summary><p id="helpText"></p></details>
       </div>
 
       <div class="card">
@@ -303,21 +427,50 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
       <div class="body" id="pickerBody"></div>
     </div>
   </div>
-  <footer>Classic Milton Bradley layout: 9 ladders, 10 chutes. Spin 1 to 6. You must land on 100 exactly; overshoot and you stay put.</footer>
+  <div class="picker" id="mg" hidden>
+    <div class="sheet mg-sheet" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
+      <div class="head"><span id="mgIcon" aria-hidden="true"></span><h3 id="mgTitle">Minigame</h3><span class="muted" id="mgClock"></span></div>
+      <div class="body" id="mgBody"></div>
+    </div>
+  </div>
+  <div class="picker" id="sg" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sgTitle">
+      <div class="head"><h3 id="sgTitle">Suggest a change</h3><button id="sgClose" aria-label="Close">✕</button></div>
+      <div class="body">
+        <p class="hint">Suggestions are reviewed by an AI builder; only game changes are accepted.</p>
+        <label class="lbl" for="sgText" style="display:block;margin:10px 0 6px">Your idea</label>
+        <textarea id="sgText" maxlength="500" placeholder="For example: a sound when someone climbs a ladder."></textarea>
+        <div class="sg-meta"><span id="sgCount">0 / 500</span><button class="primary" id="sgSend" disabled>Send</button></div>
+        <p id="sgMsg" role="status"></p>
+        <h4>Recent suggestions</h4>
+        <ul id="sgList"></ul>
+      </div>
+    </div>
+  </div>
+  <footer class="footrow"><span>Spin 1 to 6. You must land on 100 exactly; overshoot and you stay put. The faint arrows on each row show which way you travel.</span><button id="suggestBtn">💡 Suggest a change</button></footer>
 </div>
-
 <script src="chars.js"></script>
+<script src="/rules.js"></script>
+<script src="/minigames.js"></script>
 <script>
 (() => {
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
-  // Classic Milton Bradley board.
-  const LADDERS = {1:38, 4:14, 9:31, 21:42, 28:84, 36:44, 51:67, 71:91, 80:100};
-  const CHUTES  = {16:6, 47:26, 49:11, 56:53, 62:19, 64:60, 87:24, 93:73, 95:75, 98:78};
+  const RL = (typeof RULES === "object" && RULES) || { ABILITIES: {}, CHAR_AB: {}, MINIGAMES: {}, PICK_MAX: 3, PICK_COST: 2,
+    MAX_CHARGES: 2, START_CHARGES: 1, MINI_REWARD: [3, 2, 1], MINI_PLAY: 15, MINI_INTRO: 7, OVERTIME_ROUND: 50,
+    CLASSIC: { kind: "classic", ladders: [[1,38],[4,14],[9,31],[21,42],[28,84],[36,44],[51,67],[71,91],[80,100]],
+      chutes: [[16,6],[47,26],[49,11],[56,53],[62,19],[64,60],[87,24],[93,73],[95,75],[98,78]] }, BUILD: "" };
+  const SWAP_RANGE = RL.SWAP_RANGE ?? 18, QUAKE_AHEAD = RL.QUAKE_AHEAD ?? 1;
+  const GAMES = typeof MINIGAMES !== "undefined" ? MINIGAMES : [];
+  const rng32 = typeof mulberry32 === "function" ? mulberry32 : a => () => {
+    a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
   const PLAYER_COLORS = ["#e63946","#1d7cf2","#2a9d55","#f29e02","#8e44ad","#00a6a6"];
   const CHUTE_COLORS  = ["#e4572e","#d64f9a","#29a3a3","#f2a900","#5b8def","#6dbb4f","#c2410c","#9b5de5","#0f9d8a","#e76f51"];
   const SPIN_COLORS   = ["#e63946","#f29e02","#2a9d55","#1d7cf2","#8e44ad","#00a6a6"];
-  const SPEED = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0.35 : 1;
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SPEED = REDUCED ? 0.35 : 1;
 
   const $ = id => document.getElementById(id);
   const board = $("board"), spinner = $("spinner");
@@ -325,6 +478,21 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     const n = document.createElementNS(NS, tag);
     for (const k in attrs) n.setAttribute(k, attrs[k]);
     if (parent) parent.appendChild(n);
+    return n;
+  };
+  // HTML element builder; text always goes through textContent.
+  const h = (tag, props = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const k in props) {
+      const v = props[k];
+      if (v == null || v === false) continue;
+      if (k === "text") n.textContent = v;
+      else if (k === "class") n.className = v;
+      else if (k === "style") n.style.cssText = v;
+      else if (k.startsWith("on")) n[k] = v;
+      else n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : String(c));
     return n;
   };
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -342,8 +510,10 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   const easeInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
   };
+  const until = async (fn, ms = 60) => { while (!fn()) await sleep(ms); };
 
   // ---------- Board geometry ----------
   function cellXY(n) {
@@ -354,7 +524,8 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   const center = n => { const p = cellXY(n); return { x: p.x + 50, y: p.y + 50 }; };
   const startSpot = i => ({ x: 210 + i * 68, y: 1046 });
 
-  // ---------- Draw board ----------
+  // ---------- Draw board: static cells + per-game features ----------
+  let LADDERS = {}, CHUTES = {}, featLayer, boardKey = "";
   const chutePaths = {};
   function drawBoard() {
     const defs = el("defs", {}, board);
@@ -382,6 +553,20 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     const fin = el("text", { x: center(100).x, y: center(100).y + 22, "text-anchor": "middle", "font-size": 19,
       "font-weight": 700, "font-family": "Fredoka, system-ui, sans-serif", fill: "#5a3d00", "letter-spacing": 1 }, cells);
     fin.textContent = "FINISH";
+    // Travel direction: a faint chevron per square, and a turn-up arrow where each row ends.
+    const dir = el("g", { class: "dir", fill: "none", stroke: "var(--num)", "stroke-width": 4.5,
+      "stroke-linecap": "round", "stroke-linejoin": "round" }, board);
+    for (let n = 1; n < 100; n++) {
+      const { x, y } = cellXY(n), right = Math.floor((n - 1) / 10) % 2 === 0;
+      if (n % 10 === 0) {                         // row end: curve up into the next row
+        const ex = right ? x + 88 : x + 12;
+        el("path", { d: `M${x + 50},${y + 86} Q${ex},${y + 86} ${ex},${y + 52} L${ex},${y + 38}` +
+          ` M${ex - 9},${y + 48} L${ex},${y + 37} L${ex + 9},${y + 48}`, class: "turn" }, dir);
+      } else {
+        const s = right ? 1 : -1, cx = x + 50, cy = y + 85;
+        el("path", { d: `M${cx - 5 * s},${cy - 8} L${cx + 4 * s},${cy} L${cx - 5 * s},${cy + 8}` }, dir);
+      }
+    }
     // grid lines
     const grid = el("g", { stroke: "var(--grid)", "stroke-width": 2, opacity: .7 }, board);
     for (let i = 0; i <= 10; i++) {
@@ -393,17 +578,29 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     const st = el("text", { x: 24, y: 1055, "font-size": 26, "font-weight": 700, "font-family": "Fredoka, system-ui, sans-serif",
       fill: "var(--muted)", "letter-spacing": 2 }, board);
     st.textContent = "START";
+    featLayer = el("g", { id: "features" }, board);
+  }
+  // Chutes and ladders for one board {ladders:[[a,z]..], chutes:[[a,z]..]}.
+  function drawFeatures(b) {
+    if (!b || !Array.isArray(b.ladders) || !Array.isArray(b.chutes)) b = RL.CLASSIC;
+    const key = JSON.stringify([b.ladders, b.chutes]);
+    if (key === boardKey) return;
+    boardKey = key;
+    LADDERS = Object.fromEntries(b.ladders.map(([a, z]) => [+a, +z]));
+    CHUTES = Object.fromEntries(b.chutes.map(([a, z]) => [+a, +z]));
+    for (const k in chutePaths) delete chutePaths[k];
+    featLayer.replaceChildren();
+    board.setAttribute("aria-label", `Chutes and Ladders board, squares 1 to 100: ${b.ladders.length} ladders, ${b.chutes.length} chutes`);
 
-    // chutes
-    const chuteLayer = el("g", { "stroke-linecap": "round", fill: "none" }, board);
-    Object.entries(CHUTES).forEach(([from, to], idx) => {
-      const a = center(+from), b = center(+to);
-      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+    const chuteLayer = el("g", { "stroke-linecap": "round", fill: "none" }, featLayer);
+    b.chutes.forEach(([from, to], idx) => {
+      const a = center(+from), c = center(+to);
+      const dx = c.x - a.x, dy = c.y - a.y, len = Math.hypot(dx, dy);
       const nx = -dy / len, ny = dx / len;
       const amp = Math.min(130, len * 0.22) * (idx % 2 ? 1 : -1);
       const c1 = { x: a.x + dx * .3 + nx * amp, y: a.y + dy * .3 + ny * amp };
       const c2 = { x: a.x + dx * .7 - nx * amp, y: a.y + dy * .7 - ny * amp };
-      const d = `M${a.x},${a.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${b.x},${b.y}`;
+      const d = `M${a.x},${a.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${c.x},${c.y}`;
       const color = CHUTE_COLORS[idx % CHUTE_COLORS.length];
       el("path", { d, stroke: "rgba(0,0,0,.28)", "stroke-width": 34 }, chuteLayer);
       el("path", { d, stroke: color, "stroke-width": 28, opacity: .92 }, chuteLayer);
@@ -412,12 +609,10 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
       el("circle", { cx: a.x, cy: a.y, r: 19, fill: color, stroke: "rgba(0,0,0,.3)", "stroke-width": 3 }, chuteLayer);
       el("circle", { cx: a.x, cy: a.y, r: 8, fill: "rgba(0,0,0,.35)" }, chuteLayer);
     });
-
-    // ladders
-    const ladderLayer = el("g", { "stroke-linecap": "round" }, board);
-    for (const [from, to] of Object.entries(LADDERS)) {
-      const a = center(+from), b = center(+to);
-      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+    const ladderLayer = el("g", { "stroke-linecap": "round" }, featLayer);
+    for (const [from, to] of b.ladders) {
+      const a = center(+from), c = center(+to);
+      const dx = c.x - a.x, dy = c.y - a.y, len = Math.hypot(dx, dy);
       const nx = -dy / len * 15, ny = dx / len * 15;
       const g = el("g", {}, ladderLayer);
       const rungs = Math.max(2, Math.floor(len / 42));
@@ -426,13 +621,15 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
         el("line", { x1: px + nx, y1: py + ny, x2: px - nx, y2: py - ny, stroke: "var(--rung)", "stroke-width": 7 }, g);
       }
       for (const s of [1, -1]) {
-        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: b.x + nx * s, y2: b.y + ny * s,
+        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: c.x + nx * s, y2: c.y + ny * s,
           stroke: "rgba(0,0,0,.25)", "stroke-width": 10 }, g);
-        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: b.x + nx * s, y2: b.y + ny * s,
+        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: c.x + nx * s, y2: c.y + ny * s,
           stroke: "var(--rail)", "stroke-width": 7 }, g);
       }
     }
   }
+  const boardLabel = b => !b ? "" : b.kind === "classic" ? "Classic board: 9 ladders, 10 chutes."
+    : `Random board: ${b.ladders.length} ladders, ${b.chutes.length} chutes${b.expect ? `, about ${Math.round(b.expect)} spins to finish alone` : ""}.`;
 
   // ---------- Spinner ----------
   let spinAngle = 0, arrow, hubNum, wedges = [];
@@ -457,32 +654,63 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
       "font-family": "Fredoka, system-ui, sans-serif", fill: "var(--ink)", style: "transform-box:fill-box;transform-origin:center" }, spinner);
     hubNum.textContent = "?";
   }
-  async function spin(v) {
-    wedges.forEach(w => w.setAttribute("opacity", .85));
-    hubNum.textContent = "";
-    const from = spinAngle;
-    const target = from - (from % 360) + 360 * 3 + (v - 1) * 60 + 30 + (Math.random() * 36 - 18);
-    await tween(850, t => {
-      spinAngle = from + (target - from) * easeOut(t);
-      arrow.setAttribute("transform", `rotate(${spinAngle})`);
-    });
-    spinAngle = target;
+  function showHub(v) {
     wedges.forEach((w, i) => w.setAttribute("opacity", i === v - 1 ? 1 : .35));
     hubNum.textContent = v;
     hubNum.classList.add("bump");
     setTimeout(() => hubNum.classList.remove("bump"), 200);
   }
+  async function spin(v, fast) {
+    wedges.forEach(w => w.setAttribute("opacity", .85));
+    hubNum.textContent = "";
+    const from = spinAngle;
+    const target = from - (from % 360) + 360 * (fast ? 2 : 3) + (v - 1) * 60 + 30 + (Math.random() * 36 - 18);
+    await tween(fast ? 600 : 850, t => {
+      spinAngle = from + (target - from) * easeOut(t);
+      arrow.setAttribute("transform", `rotate(${spinAngle})`);
+    });
+    spinAngle = target;
+    showHub(v);
+  }
+  // Spin history chips under the turn text (Lucky / Double Spin / Pick).
+  function chipsClear() { $("chips").replaceChildren(); }
+  function chipAdd(text, cls) { const c = h("span", { class: cls || "", text }); $("chips").appendChild(c); return c; }
 
-  // ---------- Characters ----------
+  // ---------- Characters and abilities ----------
   const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
   const charOf = id => CHAR[id] || CHARACTERS[0];
   const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const avatar = (img, color, size) =>
     `<img class="av" alt="" src="${img}" style="--ring:${color}${size ? `;width:${size}px;height:${size}px` : ""}">`;
+  const avEl = (img, color, size) => {
+    const i = h("img", { class: "av", alt: "", src: img });
+    i.style.setProperty("--ring", color);
+    if (size) i.style.width = i.style.height = size + "px";
+    return i;
+  };
+  function abInfo(charId) {
+    const [kind, flavor] = RL.CHAR_AB[charId] || ["boost", "Boost"];
+    const A = RL.ABILITIES[kind] || { label: kind, icon: "★", desc: "" };
+    return { kind, flavor, label: A.label, icon: A.icon, desc: A.desc, cost: kind === "pick" ? RL.PICK_COST : 1 };
+  }
+  // Client mirror of rules.ability_problem (the server stays authoritative).
+  function abilityProblem(s, seat) {
+    const ab = abInfo(seat.char);
+    if (!s.abilities) return "Abilities are off in this game.";
+    if (RL.OVERTIME_ROUND && (s.round || 0) >= RL.OVERTIME_ROUND) return `Overtime: abilities are off after round ${RL.OVERTIME_ROUND}.`;
+    if (seat.charges < ab.cost) return (seat.charges <= 0 ? "No ability charges left." : `This ability needs ${ab.cost} charges.`) +
+      " Slide down a chute or win a minigame to earn one.";
+    if (ab.kind === "shield" && seat.shield) return "Your shield is already up.";
+    if (ab.kind === "swap" && !s.seats.some(o => o !== seat && o.pos > seat.pos && (!SWAP_RANGE || o.pos - seat.pos <= SWAP_RANGE)))
+      return "Nobody is ahead of you to swap with.";
+    if (ab.kind === "quake" && !s.seats.some(o => o !== seat && o.pos > 0 && !o.steady && (!QUAKE_AHEAD || o.pos > seat.pos)))
+      return QUAKE_AHEAD ? "Nobody ahead of you to knock back." : "Nobody else is on the board yet.";
+    return null;
+  }
 
-  // ---------- Pieces on the board (shared by both modes) ----------
-  let pieces = [], currentIdx = -1, winnerIdx = -1;
+  // ---------- Pieces on the board ----------
+  let pieces = [], currentIdx = -1, winnerIdx = -1, showPips = true;
   function buildPieces(list) {
     const old = $("tokens"); if (old) old.remove();
     const layer = el("g", { id: "tokens" }, board);
@@ -498,7 +726,8 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
         "font-family": "Fredoka, system-ui, sans-serif", fill: "#fff" }, g);
       t.textContent = i + 1;
       return { key: s.key, idx: i, char: ch.id, charName: ch.name, custom: s.name || "", name: s.name || ch.name,
-        img: ch.img, imgEl, color: s.color, mine: !!s.mine,
+        img: ch.img, imgEl, color: s.color, mine: !!s.mine, cpu: !!s.cpu,
+        charges: s.charges ?? RL.START_CHARGES, shield: s.shield || 0,
         pos: s.pos || 0, ladders: s.ladders || 0, chutes: s.chutes || 0, spins: s.spins || 0, x: 0, y: 0, sc: 1, g };
     });
     pieces.forEach(p => { Object.assign(p, restSpot(p)); place(p); });
@@ -527,23 +756,31 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
       for (const m of moves) { m.p.x = m.x0 + (m.x - m.x0) * e; m.p.y = m.y0 + (m.y - m.y0) * e; place(m.p); }
     });
   }
-  async function hopTo(p, n) {
-    const x0 = p.x, y0 = p.y, { x, y } = center(n);
+  const spotOf = n => n > 0 ? center(n) : null;
+  async function hopTo(p, n, i) {
+    const x0 = p.x, y0 = p.y, { x, y } = n > 0 ? center(n) : startSpot(p.idx);
     await tween(130, t => {
       p.x = x0 + (x - x0) * t; p.y = y0 + (y - y0) * t - Math.sin(Math.PI * t) * 26;
       p.sc = 1 + Math.sin(Math.PI * t) * .18; place(p);
     });
     p.sc = 1; place(p);
   }
+  async function walk(p, from, to) {              // square by square, either direction
+    const d = to >= from ? 1 : -1;
+    for (let s = from + d; d > 0 ? s <= to : s >= to; s += d) await hopTo(p, s);
+    p.pos = to;
+  }
   async function climb(p, from, to) {
-    const a = center(from), b = center(to), len = Math.hypot(b.x - a.x, b.y - a.y);
+    const a = { x: p.x, y: p.y }, b = center(to), len = Math.hypot(b.x - a.x, b.y - a.y);
     await tween(250 + len * .9, t => {
       const e = easeInOut(t);
       p.x = a.x + (b.x - a.x) * e; p.y = a.y + (b.y - a.y) * e; place(p);
     });
   }
-  async function slide(p, from) {
-    const path = chutePaths[from], L = path.getTotalLength();
+  async function slide(p, from, to) {
+    const path = chutePaths[from];
+    if (!path) return climb(p, from, to);         // board mismatch: straight line
+    const L = path.getTotalLength();
     await tween(300 + L * .8, t => {
       const pt = path.getPointAtLength(L * (t * t));   // accelerate down the chute
       p.x = pt.x; p.y = pt.y; p.sc = 1 + Math.sin(Math.PI * t) * .1; place(p);
@@ -555,50 +792,113 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     await tween(380, t => { p.x = x0 + Math.sin(t * Math.PI * 6) * 9 * (1 - t); place(p); });
     p.x = x0; place(p);
   }
-  function resolveMove(from, roll) {
-    const land = from + roll;
-    if (land > 100) return { land: from, to: from, via: "bounce" };
-    if (LADDERS[land]) return { land, to: LADDERS[land], via: "ladder" };
-    if (CHUTES[land]) return { land, to: CHUTES[land], via: "chute" };
-    return { land, to: land, via: null };
+  async function arcTo(p, n, lift) {
+    const x0 = p.x, y0 = p.y, b = n > 0 ? center(n) : startSpot(p.idx);
+    await tween(900, t => {
+      const e = easeInOut(t);
+      p.x = x0 + (b.x - x0) * e; p.y = y0 + (b.y - y0) * e - Math.sin(Math.PI * t) * lift;
+      p.sc = 1 + Math.sin(Math.PI * t) * .2; place(p);
+    });
+    p.sc = 1; p.pos = n; place(p);
   }
-  function logText(ev) {
-    const auto = ev.auto ? " <i>(auto)</i>" : "";
-    if (ev.via === "bounce") return [`spun <b>${ev.roll}</b>, needs ${100 - ev.from}, stays on ${ev.from}${auto}`, ""];
-    let t = `spun ${ev.roll}: ${ev.from || "start"} → ${ev.land}${auto}`;
-    if (ev.via === "ladder") return [t + ` <b>↑ ladder to ${ev.to}</b>`, "up"];
-    if (ev.via === "chute") return [t + ` <b>↓ chute to ${ev.to}</b>`, "down"];
-    return [t, ""];
+  async function ringFx(p, color, grow) {          // shield pop / charge pulse on the board
+    const c = el("circle", { cx: p.x, cy: p.y, r: 30, fill: "none", stroke: color, "stroke-width": 7 }, $("tokens"));
+    await tween(REDUCED ? 300 : 650, t => { c.setAttribute("r", 30 + t * grow); c.setAttribute("opacity", 1 - t); });
+    c.remove();
   }
-  // Animate one resolved move: spinner, hops, then ladder/chute. Same for both modes.
-  async function animateMove(p, ev) {
-    $("tokens").appendChild(p.g);               // moving piece draws on top
-    markCurrent(p);
-    setWho(p, "Spinning…");
-    await spin(ev.roll);
-    if (ev.via === "bounce") {
-      setWho(p, `Spun ${ev.roll}. Needs exactly ${100 - ev.from}, stays on ${ev.from}.`);
-      await shake(p);
-    } else {
-      setWho(p, `Spun ${ev.roll}. Moving ${ev.from || "start"} → ${ev.land}.`);
-      for (let s = ev.from + 1; s <= ev.land; s++) await hopTo(p, s);
-      p.pos = ev.land;
-      if (ev.via === "ladder") {
-        setWho(p, `Ladder! ${ev.land} climbs to ${ev.to}.`);
+  async function abilityBanner(p, ab) {
+    const b = $("abBanner");
+    b.replaceChildren(h("span", { class: "ic", text: ab.icon }), avEl(p.img, p.color, 26),
+      h("span", { text: `${p.name} used ${ab.flavor}!` }));
+    b.hidden = false;
+    b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+    await sleep(900 * Math.max(SPEED, .6));
+    b.hidden = true;
+  }
+
+  // ---------- Event animator (steps) ----------
+  // v1 events have no steps: rebuild them from roll/from/land/to/via.
+  function stepsOf(ev) {
+    if (Array.isArray(ev.steps)) return ev.steps;
+    const seat = ev.seat, st = [{ t: "spin", seat, v: ev.roll }];
+    if (ev.via === "bounce") st.push({ t: "bounce", seat });
+    else {
+      if (ev.land !== ev.from) st.push({ t: "move", seat, from: ev.from, to: ev.land });
+      if (ev.via === "ladder" || ev.via === "chute") st.push({ t: ev.via, seat, from: ev.land, to: ev.to });
+    }
+    return st;
+  }
+  const pieceOf = id => pieces.find(q => q.key === id);
+  async function animateEvent(ev) {
+    const actor = ev.kind === "mini" ? null : pieceOf(ev.seat);
+    if (ev.kind === "mini") await showResults(ev);
+    else if (actor) { $("tokens").appendChild(actor.g); markCurrent(actor); setWho(actor, "Spinning…"); }
+    chipsClear();
+    const spins = [], chips = [];
+    for (const st of stepsOf(ev)) {
+      const p = pieceOf(st.t === "swap" ? st.a : st.seat);
+      if (!p) continue;
+      if (st.t === "ability") {
+        const ab = abInfo(p.char);
+        p.charges = Math.max(0, p.charges - ab.cost);
+        if (ab.kind === "shield") p.shield = Math.max(1, p.shield);
+        renderRoster();
+        setWho(p, `${ab.icon} ${ab.flavor}! ${ab.desc}`);
+        await abilityBanner(p, ab);
+      } else if (st.t === "spin") {
+        if (st.keep) {
+          chips.forEach(c => c.el.classList.toggle("dim", !!c.dim));
+          chipAdd(`Kept ${st.v}`, "keep");
+          showHub(st.v);
+          setWho(p, `Lucky Spin keeps the ${st.v}.`);
+          await sleep(500 * SPEED);
+        } else {
+          setWho(p, st.picked ? "Picking…" : "Spinning…");
+          await spin(st.v, spins.length > 0);
+          spins.push(st.v);
+          chips.push({ el: chipAdd(st.picked ? `Picked ${st.v}` : String(st.v), st.picked ? "keep" : ""), dim: st.dim });
+          setWho(p, st.picked ? `Picked ${st.v}.` : spins.length > 1 && ev.ab === "boost" ? `Spun ${spins.join(" + ")} = ${spins.reduce((a, b) => a + b, 0)}.` : `Spun ${st.v}.`);
+          await sleep(160 * SPEED);
+        }
+      } else if (st.t === "move") {
+        const back = st.to < st.from;
+        setWho(p, back ? `Knocked back ${st.from} → ${st.to}.` : `Moving ${st.from || "start"} → ${st.to}.`);
+        $("tokens").appendChild(p.g);
+        await walk(p, st.from, st.to);
+      } else if (st.t === "ladder") {
+        setWho(p, `Ladder! ${st.from} climbs to ${st.to}.`);
         await sleep(120 * SPEED);
-        await climb(p, ev.land, ev.to);
-        p.ladders++;
-      } else if (ev.via === "chute") {
-        setWho(p, `Chute! ${ev.land} slides down to ${ev.to}.`);
+        await climb(p, st.from, st.to);
+        p.pos = st.to; p.ladders++;
+      } else if (st.t === "chute") {
+        setWho(p, `Chute! ${st.from} slides down to ${st.to}.`);
         await sleep(120 * SPEED);
-        await slide(p, ev.land);
-        p.chutes++;
+        await slide(p, st.from, st.to);
+        p.pos = st.to; p.chutes++;
+      } else if (st.t === "shield") {
+        p.shield = Math.max(0, p.shield - 1);
+        setWho(p, `Shield! The chute on ${st.at} does nothing.`);
+        renderRoster();
+        await ringFx(p, "#5b8def", 40);
+      } else if (st.t === "bounce") {
+        setWho(p, `Needs exactly ${100 - p.pos}, stays on ${p.pos}.`);
+        await shake(p);
+      } else if (st.t === "swap") {
+        const q = pieceOf(st.b);
+        setWho(p, q ? `Swaps places with ${q.name}!` : "Swap!");
+        await Promise.all([arcTo(p, st.apos, 90), q ? arcTo(q, st.bpos, -60) : null]);
+      } else if (st.t === "charge") {
+        p.charges = st.n;
+        setWho(p, `+1 charge (${st.why === "chute" ? "slid down a chute" : "won the minigame"}).`);
+        renderRoster(st.seat);
+        await ringFx(p, "var(--accent)", 24);
       }
     }
-    p.pos = ev.to; p.spins++;
+    if (actor && ev.to != null && actor.pos !== ev.to) actor.pos = ev.to;   // reconcile to the event's result
+    if (actor) actor.spins++;
     await settleAll();
-    const [html, cls] = logText(ev);
-    addLog(ev.n, p, html, cls);
+    renderRoster();
+    logEvent(ev);
   }
 
   // ---------- Shared UI ----------
@@ -607,28 +907,75 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     $("what").textContent = msg;
   }
   function markCurrent(p) { pieces.forEach(q => q.g.classList.toggle("current", q === p)); }
-  function renderRoster() {
+  function pipsEl(n, pulse) {
+    const w = h("span", { class: "pips" + (pulse ? " pulse" : ""), title: `${plural(n, "charge")} (max ${RL.MAX_CHARGES})`,
+      "aria-label": `${plural(n, "ability charge")}` });
+    for (let i = 0; i < RL.MAX_CHARGES; i++) w.appendChild(h("i", { class: i < n ? "on" : "" }));
+    return w;
+  }
+  function renderRoster(pulseKey) {
     const r = $("roster");
-    r.innerHTML = "";
+    r.replaceChildren();
     pieces.forEach((p, i) => {
-      const li = document.createElement("li");
-      if (i === currentIdx && winnerIdx < 0) li.className = "current";
-      li.innerHTML = `${avatar(p.img, p.color)}<span class="name">${esc(p.name)}${i === winnerIdx ? " 🏆" : ""}` +
-        `${mode === "online" && p.mine ? '<span class="mine-tag">you</span>' : ""}</span>` +
-        `<span class="sq">${p.pos ? "Sq " + p.pos : "Start"}</span>` +
-        `<span class="meta">${p.custom ? esc(p.charName) + " · " : ""}${plural(p.spins, "spin")} · ${plural(p.ladders, "ladder")} · ${plural(p.chutes, "chute")}</span>` +
-        `<span class="bar"><i style="width:${p.pos}%;background:${p.color}"></i></span>`;
+      const ab = abInfo(p.char);
+      const li = h("li", { class: i === currentIdx && winnerIdx < 0 ? "current" : "" },
+        avEl(p.img, p.color),
+        h("span", { class: "name" }, p.name + (i === winnerIdx ? " 🏆" : ""),
+          mode === "online" && p.mine ? h("span", { class: "mine-tag", text: "you" }) : null,
+          p.cpu ? h("span", { class: "mine-tag", text: "CPU" }) : null),
+        h("span", { class: "sq", text: p.pos ? "Sq " + p.pos : "Start" }),
+        h("span", { class: "meta" },
+          h("span", { class: "abtag", title: `${ab.label}: ${ab.desc}` }, h("span", { class: "abic", text: ab.icon }), " " + ab.flavor),
+          showPips ? pipsEl(p.charges, pulseKey === p.key) : null,
+          p.shield > 0 ? h("span", { class: "shield-ic", title: "Chute shield is up", "aria-label": "Shield up", text: "🛡️" }) : null,
+          h("br"),
+          `${p.custom ? p.charName + " · " : ""}${plural(p.spins, "spin")} · ${plural(p.ladders, "ladder")} · ${plural(p.chutes, "chute")}`),
+        h("span", { class: "bar" }, h("i", { style: `width:${p.pos}%;background:${p.color}` })));
       r.appendChild(li);
     });
   }
-  function addLog(n, p, html, cls) {
+  function addLog(label, p, html, cls) {
     const li = document.createElement("li");
     if (cls) li.className = cls;
-    li.innerHTML = `<span class="t">T${n}</span><span class="dot" style="background:${p.color}"></span><span>${esc(p.name)} ${html}</span>`;
+    li.innerHTML = `<span class="t">${esc(label)}</span><span class="dot" style="background:${p ? p.color : "var(--muted)"}"></span><span>${p ? esc(p.name) + " " : ""}${html}</span>`;
     const log = $("log");
     log.prepend(li);
     while (log.children.length > 200) log.lastChild.remove();
   }
+  function logEvent(ev) {
+    if (ev.kind === "mini") {
+      const g = gameOf(ev.game);
+      const parts = (ev.results || []).map(r => { const p = pieceOf(r.seat); return `${ordinal(r.rank)} ${esc(p ? p.name : "?")}${r.moves ? ` +${r.moves}` : ""}${r.charge ? " ⚡" : ""}`; });
+      return addLog("MG", null, `<b>${esc(g ? g.title : "Minigame")}</b>: ${parts.join(", ")}`, "up");
+    }
+    const p = pieceOf(ev.seat);
+    if (!p) return;
+    const label = "T" + (ev.turn || ev.n);
+    const auto = ev.auto ? " <i>(auto)</i>" : "";
+    const ab = ev.ab ? abInfo(p.char) : null;
+    let pre = ab ? `used ${esc(ab.icon)} ${esc(ab.flavor)}, ` : "";
+    if (ev.ab === "swap") {
+      const q = pieceOf(ev.target);
+      return addLog(label, p, `${pre}swapped with ${esc(q ? q.name : "?")}: now on ${ev.to}${auto}`, "up");
+    }
+    if (ev.ab === "quake") {
+      const hit = stepsOf(ev).filter(s => s.t === "move" && s.seat !== ev.seat).length;
+      pre += `knocked back ${plural(hit, "player")}, `;
+    }
+    const sv = stepsOf(ev).filter(s => s.t === "spin" && !s.keep).map(s => s.v);
+    const rolled = ev.rolls ? `spun ${ev.rolls.join(", ")}, kept ${ev.roll}` : ev.ab === "pick" ? `picked ${ev.roll}`
+      : ev.ab === "boost" && sv.length > 1 ? `spun ${sv.join(" + ")} = ${ev.roll}` : `spun ${ev.roll}`;
+    let t, cls = "";
+    if (ev.via === "bounce") t = `${rolled}, needs ${100 - ev.from}, stays on ${ev.from}`;
+    else {
+      t = `${rolled}: ${ev.from || "start"} → ${ev.land}`;
+      if (ev.via === "ladder") { t += ` <b>↑ ladder to ${ev.to}</b>`; cls = "up"; }
+      else if (ev.via === "chute") { t += ` <b>↓ chute to ${ev.to}</b>`; cls = "down"; }
+      else if (ev.via === "shield") t += ` <b>🛡️ shield blocks the chute</b>`;
+    }
+    addLog(label, p, pre + t + auto + (ev.mini ? " · <b>Minigame time!</b>" : ""), cls);
+  }
+  const ordinal = n => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");
   function clearConfetti() { document.querySelectorAll(".confetti").forEach(c => c.remove()); }
   function showWinner(p, turns, againLabel) {
     $("winTitle").innerHTML = `${avatar(p.img, p.color, 56)}<span>${esc(p.name)} wins!</span>`;
@@ -651,34 +998,403 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   }
   function hideBanner() { $("banner").hidden = true; clearConfetti(); }
 
-  // ---------- Character picker ----------
-  let pickerDone = null, lastFocus = null;
+  // ---------- Modals (picker, minigame, suggestions) ----------
+  let lastFocus = null;
+  function openModal(id, focusEl) {
+    if ($(id).hidden) lastFocus = document.activeElement;
+    $(id).hidden = false;
+    if (focusEl) focusEl.focus();
+  }
+  function closeModal(id) {
+    if ($(id).hidden) return;
+    $(id).hidden = true;
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
   // takenBy: id -> {label, color} for pieces held by someone else.
   function openPicker(title, selected, takenBy, onPick) {
-    lastFocus = document.activeElement;
-    pickerDone = onPick;
     $("pickerTitle").textContent = title;
     const body = $("pickerBody");
-    body.innerHTML = "";
+    body.replaceChildren(abilityLegend());
     for (const group of [...new Set(CHARACTERS.map(c => c.group))]) {
-      const h = document.createElement("h4"); h.textContent = group; body.appendChild(h);
-      const grid = document.createElement("div"); grid.className = "grid"; body.appendChild(grid);
+      body.appendChild(h("h4", { text: group }));
+      const grid = h("div", { class: "grid" });
+      body.appendChild(grid);
       for (const c of CHARACTERS.filter(c => c.group === group)) {
-        const b = document.createElement("button"), tk = takenBy[c.id];
-        if (c.id === selected) b.className = "sel";
-        b.innerHTML = `<img alt="" src="${c.img}"><span>${esc(c.name)}</span>` +
-          (tk ? `<span class="tag" style="background:${tk.color}">${esc(tk.label)}</span>` : "");
-        b.onclick = () => { closePicker(); onPick(c.id); };
+        const tk = takenBy[c.id], ab = abInfo(c.id);
+        const b = h("button", { class: c.id === selected ? "sel" : "", title: `${ab.flavor} (${ab.label}): ${ab.desc}`,
+          "aria-label": `${c.name}. Ability ${ab.flavor}, ${ab.label}: ${ab.desc}`,
+          onclick: () => { closePicker(); onPick(c.id); } },
+          h("img", { alt: "", src: c.img }), h("span", { text: c.name }),
+          h("small", { class: "abl" }, h("span", { class: "abic", text: ab.icon }), " " + ab.flavor),
+          tk ? h("span", { class: "tag", style: `background:${tk.color}`, text: tk.label }) : null);
         grid.appendChild(b);
       }
     }
-    $("picker").hidden = false;
-    (body.querySelector(".sel") || body.querySelector("button")).focus();
+    openModal("picker", body.querySelector(".sel") || body.querySelector(".grid button"));
   }
-  function closePicker() { $("picker").hidden = true; pickerDone = null; if (lastFocus) lastFocus.focus(); }
+  function closePicker() { closeModal("picker"); }
+  function abilityLegend() {
+    const d = h("details", { class: "legend" }, h("summary", { text: "What the abilities do" }));
+    const ul = h("ul");
+    for (const k in RL.ABILITIES) {
+      const A = RL.ABILITIES[k];
+      ul.appendChild(h("li", {}, h("span", { class: "abic", text: A.icon }), h("b", { text: " " + A.label + ": " }), A.desc));
+    }
+    d.append(ul, h("p", { class: "hint", text: helpText() }));
+    return d;
+  }
+  const helpText = () => `Each character has one ability. You start with ${RL.START_CHARGES} charge and can hold ${RL.MAX_CHARGES}. ` +
+    `Using it costs 1 charge (Pick a Number costs ${RL.PICK_COST}). Earn +1 for sliding down a chute and +1 for winning a minigame.` +
+    (RL.OVERTIME_ROUND ? ` From round ${RL.OVERTIME_ROUND} on, abilities switch off so every game ends.` : "");
 
-  // ================= LOCAL MODE (one screen) =================
-  const Lc = { turn: 0, current: 0, winner: null, playing: false, busy: false, loopId: 0, turnPromise: null };
+  // ================= Server connection (online rooms and one-screen solo rooms) =================
+  let clientId = store.get("cl.client", "");
+  if (!/^[0-9a-f]{32}$/.test(clientId)) {
+    clientId = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join("");
+    store.set("cl.client", clientId);
+  }
+  // G holds whichever room is shown: an online room (polled) or this screen's solo room (client-driven).
+  const G = { code: null, solo: false, s: null, game: null, lastN: 0, queue: [], animating: false, offset: 0,
+    pollToken: 0, layoutKey: "", ctl: 0 };
+  const serverNow = () => (Date.now() + G.offset) / 1000;
+  async function api(method, path, body) {
+    const r = await fetch(path, {
+      method, headers: { "X-Client-Id": clientId, ...(body ? { "Content-Type": "application/json" } : {}) },
+      body: body ? JSON.stringify(body) : undefined, cache: "no-store"
+    });
+    let data = {};
+    try { data = await r.json(); } catch {}
+    if (data && data.build) checkBuild(data.build);
+    if (!r.ok) { const e = new Error(data.error || `Server error (${r.status}).`); e.status = r.status; throw e; }
+    return data;
+  }
+  const errTimers = {};
+  function showErr(id, msg) {
+    $(id).textContent = msg || "";
+    clearTimeout(errTimers[id]);
+    if (msg) errTimers[id] = setTimeout(() => { $(id).textContent = ""; }, 7000);
+  }
+  const seatPieceList = s => s.seats.map(seat => ({ key: seat.id, color: seat.color, char: seat.char, name: seat.name, pos: seat.pos,
+    ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins, mine: seat.mine, cpu: seat.cpu, charges: seat.charges, shield: seat.shield }));
+  const layoutKeyOf = s => s.seats.map(x => x.id + x.color).join("|");
+  const curSeat = () => G.s && G.s.status === "playing" ? G.s.seats[G.s.current] : null;
+  const busyAnim = () => G.animating || G.queue.length > 0;
+  const idle = () => until(() => !busyAnim() && !MG.busy);
+  function handleState(s) {
+    G.offset = s.now * 1000 - Date.now();
+    const fresh = !G.s || s.game !== G.game || s.code !== G.s.code;
+    G.s = s;
+    showPips = !!s.abilities;
+    if (fresh) {                                    // first load, or a new game: snap, no replay
+      G.game = s.game; G.queue = [];
+      G.lastN = s.events.reduce((m, e) => Math.max(m, e.n), 0);
+      drawFeatures(s.board);
+      snapToState();
+      $("log").innerHTML = "";
+      for (const ev of s.events) logEvent(ev);
+      MG.key = s.mini ? miniKey(s.mini) + (s.solo ? "" : "") : null;
+      if (s.mini) MG.key = null;                   // a pending minigame still needs playing
+    } else {
+      if (s.status !== "playing") drawFeatures(s.board);   // lobby re-roll / classic
+      for (const ev of s.events) if (ev.n > G.lastN) G.queue.push(ev);
+      G.lastN = s.events.reduce((m, e) => Math.max(m, e.n), G.lastN);
+      s.seats.forEach(seat => { const p = pieceOf(seat.id); if (p) { setPieceChar(p, seat.char); setPieceName(p, seat.name); p.mine = seat.mine; p.cpu = seat.cpu; } });
+      if (!G.animating && !G.queue.length && layoutKeyOf(s) !== G.layoutKey) snapToState();
+    }
+    drainQueue();
+    render();
+    if (MG.phase === "wait") renderWait();
+  }
+  function snapToState() {
+    const s = G.s;
+    hideBanner();
+    buildPieces(seatPieceList(s));
+    G.layoutKey = layoutKeyOf(s);
+    syncTurnMarkers();
+  }
+  function syncTurnMarkers() {
+    const s = G.s;
+    winnerIdx = s.winner ? s.seats.findIndex(x => x.id === s.winner) : -1;
+    currentIdx = s.status === "playing" ? s.current : -1;
+    markCurrent(pieces[currentIdx] || null);
+    renderRoster();
+    if (s.status === "over" && winnerIdx > -1) showWinner(pieces[winnerIdx], s.turn, s.solo ? "Play again" : s.isHost ? "Play again" : "");
+    else hideBanner();
+  }
+  async function drainQueue() {
+    if (G.animating) return;
+    G.animating = true;
+    const game = G.game, code = G.code;
+    render();
+    while (G.queue.length && game === G.game && code === G.code) await animateEvent(G.queue.shift());
+    G.animating = false;
+    if (game !== G.game || code !== G.code || !G.s) return;
+    // Reconcile with the server's truth (covers anything we could not animate).
+    const s = G.s;
+    if (layoutKeyOf(s) !== G.layoutKey) snapToState();
+    else {
+      s.seats.forEach(seat => {
+        const p = pieceOf(seat.id);
+        if (p) Object.assign(p, { pos: seat.pos, ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins, charges: seat.charges, shield: seat.shield });
+      });
+      await settleAll();
+      syncTurnMarkers();
+    }
+    render();
+    checkMini();
+  }
+  function render() { if (mode === "online") renderOnline(); else renderLocal(); renderSpinCard(); }
+
+  // ---------- Spin card: Spin + ability buttons ----------
+  // Who may act now from this screen: local = a Human seat's turn, online = my own seat's turn.
+  function actingSeat() {
+    const s = G.s, cur = curSeat();
+    if (!s || !cur || cur.cpu || s.mini) return null;
+    if (mode === "local" ? !G.solo : !cur.mine) return null;
+    return cur;
+  }
+  let pickOpen = false;
+  function renderSpinCard() {
+    const seat = actingSeat(), s = G.s;
+    const busy = busyAnim() || MG.busy || Lc.busy || G.sending;
+    const ready = s && (s.solo || serverNow() >= (s.readyAt || 0) - 0.3);
+    $("spinActs").hidden = !seat;
+    if (!seat) { pickOpen = false; $("pickRow").hidden = true; return; }
+    const mineCount = s.seats.filter(x => mode === "local" ? !x.cpu : x.mine).length;
+    $("spinBtn").textContent = mineCount > 1 ? `Spin for ${seat.name || charOf(seat.char).name}!` : "Spin!";
+    $("spinBtn").disabled = busy || !ready;
+    $("spinBtn").classList.toggle("go", !busy && !!ready);
+    const ab = abInfo(seat.char), why = abilityProblem(s, seat);
+    $("abIcon").textContent = ab.icon;
+    $("abName").textContent = ab.flavor;
+    $("abCost").textContent = ab.cost > 1 ? `${ab.cost} charges` : "1 charge";
+    $("abBtn").disabled = busy || !ready || !!why;
+    $("abBtn").title = why || `${ab.label}: ${ab.desc}`;
+    $("abBtn").setAttribute("aria-label", `Use ${ab.flavor} (${ab.label}, costs ${$("abCost").textContent})${why ? ". Unavailable: " + why : ""}`);
+    $("abBtn").setAttribute("aria-expanded", ab.kind === "pick" ? String(pickOpen) : "false");
+    $("abWhy").textContent = why || `${ab.label}: ${ab.desc}`;
+    if (why || busy) pickOpen = false;
+    $("pickRow").hidden = !(pickOpen && ab.kind === "pick");
+  }
+  function buildPickRow() {
+    const row = $("pickRow");
+    row.replaceChildren(h("span", { class: "hint", text: "Move exactly:" }));
+    for (let n = 1; n <= RL.PICK_MAX; n++)
+      row.appendChild(h("button", { class: "primary", text: String(n), "aria-label": `Pick ${n}`, onclick: () => doSpin({ ability: true, pick: n }) }));
+  }
+  function abClick() {
+    const seat = actingSeat();
+    if (!seat) return;
+    if (abInfo(seat.char).kind === "pick") { pickOpen = !pickOpen; renderSpinCard(); if (pickOpen) $("pickRow").querySelector("button").focus(); return; }
+    doSpin({ ability: true });
+  }
+  async function doSpin(extra = {}) {
+    const s = G.s;
+    if (!s || G.sending) return;
+    pickOpen = false;
+    G.sending = true; renderSpinCard();
+    try { handleState(await api("POST", `/api/rooms/${G.code}/spin`, { expect: s.seq ?? s.turn, ...extra })); }
+    catch (e) {
+      showErr(mode === "local" ? "localErr" : "roomErr", e.message);
+      $("what").textContent = e.message;
+      if (e.status === 409) refresh();
+    }
+    finally { G.sending = false; renderSpinCard(); }
+    if (mode === "local" && Lc.playing) { await idle(); localKick(); }
+  }
+  async function refresh() {
+    if (!G.code) return;
+    try { handleState(await api("GET", `/api/rooms/${G.code}`)); } catch {}
+  }
+  async function roomAction(action, body = {}, errId) {
+    if (!G.code) return null;
+    try { const v = await api("POST", `/api/rooms/${G.code}/${action}`, body); handleState(v); return v; }
+    catch (e) { showErr(errId || (mode === "local" ? "localErr" : "roomErr"), e.message); return null; }
+  }
+
+  // ================= Minigames =================
+  const MG = { key: null, busy: false, phase: "", abort: null };
+  const miniKey = m => `${m.id}|${m.seed}|${m.startAt}`;
+  const gameOf = id => GAMES.find(g => g.id === id) || null;
+  function checkMini() {
+    const s = G.s;
+    if (!s || !s.mini || MG.busy || busyAnim()) return;
+    const k = miniKey(s.mini);
+    if (k === MG.key) return;
+    MG.key = k;
+    runMini(s.mini);
+  }
+  const miniStill = k => G.s && G.s.mini && miniKey(G.s.mini) === k;
+  function mgShow(game) {
+    $("mgIcon").textContent = game ? game.icon : "🎲";
+    $("mgTitle").textContent = game ? game.title : "Minigame";
+    $("mgClock").textContent = "";
+    openModal("mg");
+  }
+  const rewardText = () => {
+    const o = ["1st", "2nd", "3rd", "4th", "5th"], n = G.s ? G.s.seats.length : 6;
+    const r = RL.MINI_REWARD.slice(0, Math.max(1, n - 1));        // last place never moves
+    return r.map((v, i) => `${o[i]} +${v}`).join(", ") + ", last 0" + (G.s && G.s.abilities ? ", winner +1 charge" : "");
+  };
+  function introBody(game, s, lead) {
+    const players = h("ul", { class: "mg-players" });
+    for (const seat of s.seats) players.appendChild(h("li", {}, avEl(charOf(seat.char).img, seat.color, 26),
+      h("span", { text: seat.name || charOf(seat.char).name }), seat.cpu ? h("small", { text: "CPU" }) : null));
+    return [lead ? h("p", { class: "mg-lead", text: lead }) : null,
+      h("p", { class: "mg-howto", text: game ? game.howto : "This minigame could not load on this device; you will sit this one out." }),
+      players,
+      h("p", { class: "mg-reward" }, h("b", { text: "Squares: " }), rewardText())];
+  }
+  function mgBody(...kids) { $("mgBody").replaceChildren(...kids.flat().filter(Boolean)); }
+  function readyButton(label, autoMs) {
+    return new Promise(res => {
+      const b = h("button", { class: "primary big", text: label });
+      let t;
+      b.onclick = () => { clearTimeout(t); res(); };
+      if (autoMs) t = setTimeout(res, autoMs);
+      $("mgBody").appendChild(h("div", { class: "row mg-go" }, b));
+      b.focus();
+    });
+  }
+  async function countdown(endAt) {               // endAt in server seconds (online) or null = 3 s from now
+    const end = endAt || serverNow() + 3;
+    const big = h("div", { class: "mg-count", "aria-live": "assertive" });
+    $("mgBody").appendChild(big);
+    while (serverNow() < end) {
+      big.textContent = Math.max(1, Math.ceil(end - serverNow()));
+      await sleep(100);
+    }
+    big.textContent = "Go!";
+    await sleep(250);
+  }
+  async function playOne(game, m, seat, deadline) {
+    const stage = h("div", { class: "mg-stage" });
+    mgBody(h("p", { class: "mg-lead" }, avEl(charOf(seat.char).img, seat.color, 22), " " + (seat.name || charOf(seat.char).name) + " is playing"), stage);
+    const ac = new AbortController();
+    MG.abort = ac;
+    const cap = Math.max(1000, Math.min(((RL.MINI_PLAY || 15) + 5) * 1000, deadline ? (deadline - serverNow() - 1) * 1000 : 1e9));
+    const timer = setTimeout(() => ac.abort(), cap);          // never let a game block forever
+    const ctx = { rng: rng32(m.seed), seed: m.seed, makeRng: x => rng32(x),
+      chars: CHARACTERS.map(c => ({ id: c.id, name: c.name, img: c.img })),
+      player: { name: seat.name || charOf(seat.char).name, char: seat.char, color: seat.color }, signal: ac.signal, reduced: REDUCED };
+    let score = 0;
+    try {
+      score = await Promise.race([
+        Promise.resolve(game.play(stage, ctx)),
+        new Promise(res => ac.signal.addEventListener("abort", () => setTimeout(() => res(0), 1500)))
+      ]);
+    } catch { score = 0; }
+    clearTimeout(timer);
+    if (!ac.signal.aborted) ac.abort();
+    MG.abort = null;
+    return Math.max(0, Math.round(+score || 0));
+  }
+  async function submitScore(seat, m, score) {
+    try { handleState(await api("POST", `/api/rooms/${G.code}/minigame`, { seat: seat.id, id: m.id, score })); return true; }
+    catch (e) { mgBody(h("p", { class: "err", text: e.message })); await sleep(1500); return false; }
+  }
+  async function runMini(m) {
+    const k = miniKey(m), s = G.s, game = gameOf(m.kind), code = G.code;
+    MG.busy = true; MG.phase = "intro";
+    try {
+      const humans = s.seats.filter(x => (s.solo || x.mine) && !x.cpu && !(m.submitted || []).includes(x.id));
+      if (s.solo) {
+        if (!humans.length) return;
+        mgShow(game);
+        for (const seat of humans) {
+          if (!miniStill(k) || G.code !== code) return;
+          MG.phase = "intro";
+          mgBody(introBody(game, s, humans.length > 1 || s.seats.length > 1 ? `Pass to ${seat.name || charOf(seat.char).name}` : ""));
+          await readyButton(`Ready, ${seat.name || charOf(seat.char).name}!`);
+          let score = 0;
+          if (game) { MG.phase = "play"; mgBody(introBody(game, s, "")); await countdown(null); score = await playOne(game, m, seat, null); }
+          MG.phase = "submit";
+          mgBody(h("p", { class: "mg-lead", text: `Score: ${score}` }));
+          await submitScore(seat, m, score);
+        }
+        return;
+      }
+      // Online: everyone plays at mini.startAt (server clock) until mini.deadline.
+      mgShow(game);
+      const late = serverNow() > m.startAt - 1;
+      const canPlay = () => game && (!m.deadline || serverNow() < m.deadline - 16);
+      if (!late) {
+        mgBody(introBody(game, s, humans.length ? "" : "Watching: your seats are played by the computer."));
+        const clock = h("p", { class: "mg-clock-line" });
+        $("mgBody").appendChild(clock);
+        while (serverNow() < m.startAt - 3 && miniStill(k)) {
+          clock.textContent = `Starts in ${Math.ceil(m.startAt - serverNow())} s`;
+          await sleep(200);
+        }
+        clock.remove();
+        if (humans.length && canPlay()) await countdown(m.startAt);
+      }
+      for (const [i, seat] of humans.entries()) {
+        if (!miniStill(k) || G.code !== code || !canPlay()) break;
+        if (late || i > 0) {
+          MG.phase = "intro";
+          mgBody(introBody(game, s, humans.length > 1 ? `Now: ${seat.name || charOf(seat.char).name}` : "You are just in time."));
+          await readyButton("Ready!", 4000);
+          if (!canPlay()) break;
+          await countdown(null);
+        }
+        MG.phase = "play";
+        const score = await playOne(game, m, seat, m.deadline);
+        if (!miniStill(k)) break;
+        await submitScore(seat, m, score);
+      }
+      MG.phase = "wait";
+      renderWait();
+      const giveUp = (m.deadline || serverNow() + 30) + 15;
+      while (miniStill(k) && G.code === code && serverNow() < giveUp) {
+        await sleep(400);
+        if (MG.phase === "wait") renderWait();
+      }
+    } finally {
+      MG.busy = false;
+      if (MG.phase !== "results") { MG.phase = ""; closeModal("mg"); }
+      render();
+      if (mode === "local" && Lc.playing) localKick();
+    }
+  }
+  function renderWait() {
+    const s = G.s, m = s && s.mini;
+    if (!m) return;
+    const ul = h("ul", { class: "mg-players" });
+    for (const seat of s.seats) {
+      const done = seat.cpu || (m.submitted || []).includes(seat.id);
+      ul.appendChild(h("li", { class: done ? "done" : "" }, avEl(charOf(seat.char).img, seat.color, 26),
+        h("span", { text: seat.name || charOf(seat.char).name }), h("small", { text: seat.cpu ? "CPU" : done ? "✓ done" : "playing…" })));
+    }
+    const left = m.deadline ? Math.max(0, Math.ceil(m.deadline - serverNow())) : null;
+    mgBody(h("p", { class: "mg-lead", text: "Waiting for others…" }), ul,
+      left != null ? h("p", { class: "hint", text: `Results in at most ${left} s.` }) : null);
+  }
+  async function showResults(ev) {
+    const game = gameOf(ev.game);
+    MG.phase = "results";
+    mgShow(game);
+    const tbl = h("table", { class: "mg-results" },
+      h("thead", {}, h("tr", {}, ...["#", "Player", "Score", "Move", ""].map(t => h("th", { text: t })))));
+    const tb = h("tbody");
+    for (const r of ev.results || []) {
+      const p = pieceOf(r.seat);
+      tb.appendChild(h("tr", { class: r.rank === 1 && !r.absent ? "win" : "" },
+        h("td", { text: ordinal(r.rank) }),
+        h("td", {}, p ? avEl(p.img, p.color, 24) : null, " " + (p ? p.name : "?")),
+        h("td", { text: r.absent ? "absent" : String(r.score) }),
+        h("td", { text: r.moves ? `+${r.moves}` : "0" }),
+        h("td", { text: r.charge ? "+1 ⚡" : "" })));
+    }
+    tbl.appendChild(tb);
+    mgBody(h("p", { class: "mg-lead", text: "Results" }), tbl);
+    await readyButton("Continue", 3500);
+    MG.phase = "";
+    closeModal("mg");
+  }
+
+  // ================= LOCAL MODE (one screen, backed by a server solo room) =================
+  const Lc = { playing: false, busy: false, loopId: 0, preview: null, classic: store.get("cl.boardMode", "random") === "classic" };
   let picks = [];
   try { picks = JSON.parse(store.get("cl.picks", "[]")).filter(id => CHAR[id]); } catch { picks = []; }
   const shuffledIds = () => CHARACTERS.map(c => c.id).sort(() => Math.random() - .5);
@@ -688,26 +1404,42 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     store.set("cl.picks", JSON.stringify(picks));
   }
   fillPicks();
-  let names = [];
+  let names = [], cpus = [];
   try { names = JSON.parse(store.get("cl.names", "[]")).map(cleanName).slice(0, 6); } catch { names = []; }
+  try { cpus = JSON.parse(store.get("cl.cpu", "[]")).slice(0, 6); } catch { cpus = []; }
+  const isCpu = i => cpus[i] !== false;            // default CPU, like v1 autoplay
   function clampPlayers(v) { v = parseInt(v, 10); return Math.min(6, Math.max(1, isNaN(v) ? 3 : v)); }
   const nPlayers = () => clampPlayers($("players").value);
+  const localLive = () => mode === "local" && G.solo && G.s && G.s.status !== "lobby" && !Lc.setup;
   function renderPicks() {
     const ul = $("picks");
-    ul.innerHTML = "";
+    ul.replaceChildren();
     for (let i = 0; i < nPlayers(); i++) {
-      const c = charOf(picks[i]), li = document.createElement("li");
-      li.innerHTML = `<button aria-label="Player ${i + 1}: ${esc(c.name)}. Change character">${avatar(c.img, PLAYER_COLORS[i])}<span>${esc(c.name)}</span></button>` +
-        `<input class="name" maxlength="20" autocomplete="off" placeholder="Player ${i + 1} name" aria-label="Player ${i + 1} name">`;
-      const inp = li.querySelector("input");
+      const c = charOf(picks[i]), ab = abInfo(c.id);
+      const btn = h("button", { "aria-label": `Player ${i + 1}: ${c.name}, ability ${ab.flavor}. Change character`, title: `${ab.flavor} (${ab.label}): ${ab.desc}` },
+        avEl(c.img, PLAYER_COLORS[i]), h("span", { class: "who2" }, h("b", { text: c.name }), h("small", { text: `${ab.icon} ${ab.flavor}` })));
+      const inp = h("input", { class: "name", maxlength: 20, autocomplete: "off", placeholder: `Player ${i + 1} name`, "aria-label": `Player ${i + 1} name` });
       inp.value = names[i] || "";
+      const tog = h("button", { class: "cpu-tog" + (isCpu(i) ? "" : " human"), "aria-pressed": String(!isCpu(i)),
+        title: "Computer plays this seat, or a person spins it", text: isCpu(i) ? "CPU" : "Human",
+        "aria-label": `Player ${i + 1} is ${isCpu(i) ? "computer" : "human"}. Toggle` });
       inp.addEventListener("input", () => {
         names[i] = cleanName(inp.value);
         store.set("cl.names", JSON.stringify(names));
-        const p = mode === "local" && pieces[i];
-        if (p) { setPieceName(p, names[i]); renderRoster(); if (i === currentIdx && !Lc.busy) setWho(p, $("what").textContent); }
+        const p = pieces[i];
+        if (p && mode === "local") { setPieceName(p, names[i]); renderRoster(); }
       });
-      li.firstChild.onclick = () => {
+      inp.addEventListener("change", () => { if (localLive() && G.s.seats[i]) roomAction("name", { seat: G.s.seats[i].id, name: names[i] || "" }); });
+      tog.onclick = () => {
+        cpus[i] = !isCpu(i);
+        store.set("cl.cpu", JSON.stringify(cpus.slice(0, 6)));
+        renderPicks();
+        ul.children[i].querySelector(".cpu-tog").focus();
+        if (localLive() && G.s.seats[i]) roomAction("cpu", { seat: G.s.seats[i].id, cpu: isCpu(i) }).then(() => localKick());
+        else if (pieces[i]) { pieces[i].cpu = isCpu(i); renderRoster(); }
+      };
+      btn.onclick = () => {
+        if (localLive() && G.s.status === "playing") { showErr("localErr", "Characters are locked during a game. Changes apply to the next game."); }
         if (Lc.playing) localSetPlaying(false);
         const taken = {};
         picks.slice(0, nPlayers()).forEach((id, j) => { if (j !== i) taken[id] = { label: "P" + (j + 1), color: PLAYER_COLORS[j] }; });
@@ -718,123 +1450,154 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
           applyPicks();
         });
       };
-      ul.appendChild(li);
+      ul.appendChild(h("li", {}, btn, inp, tog));
     }
   }
-  function applyPicks() {                         // works mid-game too
+  function applyPicks() {
     store.set("cl.picks", JSON.stringify(picks));
     renderPicks();
-    if (mode !== "local") return;
-    pieces.forEach(p => setPieceChar(p, picks[p.idx]));
-    renderRoster();
-    const cur = Lc.winner || pieces[Lc.current];
-    if (cur && $("who").textContent !== "Ready") setWho(cur, $("what").textContent);
+    if (mode === "local" && !localLive()) localIdle(true);
   }
-  function localNew(n) {
-    Lc.loopId++; Lc.playing = false;
-    Object.assign(Lc, { turn: 0, current: 0, winner: null });
-    buildPieces(Array.from({ length: n }, (_, i) => ({ key: i, color: PLAYER_COLORS[i], char: picks[i], name: names[i] })));
-    currentIdx = 0; winnerIdx = -1;
-    markCurrent(pieces[0]);
-    $("log").innerHTML = "";
+  const localSettings = () => ({ abilities: $("abilitiesChk").checked, miniEvery: +$("miniSel").value });
+  // Setup state: preview board, pieces at start, nothing sent to the server yet.
+  function localIdle(keepBoard) {
+    Lc.loopId++; Lc.playing = false; Lc.setup = true;
+    G.s = null; G.game = null; G.queue = []; G.code = null; G.solo = false;
+    const n = nPlayers();
+    showPips = $("abilitiesChk").checked;
+    buildPieces(Array.from({ length: n }, (_, i) => ({ key: i, color: PLAYER_COLORS[i], char: picks[i], name: names[i], cpu: isCpu(i) })));
+    currentIdx = winnerIdx = -1; markCurrent(null);
     hideBanner();
-    setWho(pieces[0], "Up first. Press Play or Step.");
-    renderRoster();
-    localButtons();
-  }
-  function localIdle() {
-    localNew(nPlayers());
-    markCurrent(null);
+    if (!keepBoard || !Lc.preview) newPreview();
+    else drawFeatures(Lc.preview);
+    $("log").innerHTML = "";
     $("startBtn").textContent = "Start game";
-    setWho(null, "Pick characters, then press Start (or Step through it yourself).");
-  }
-  async function localTurn() {
-    if (Lc.busy || Lc.winner || mode !== "local") return;
-    Lc.busy = true; localButtons();
-    $("startBtn").textContent = "New game";
-    const p = pieces[Lc.current];
-    Lc.turn++;
-    const roll = 1 + Math.floor(Math.random() * 6);
-    await animateMove(p, { n: Lc.turn, roll, from: p.pos, ...resolveMove(p.pos, roll) });
-    if (mode !== "local") { Lc.busy = false; return; }
-    if (p.pos === 100) {
-      Lc.winner = p; winnerIdx = p.idx; Lc.playing = false; Lc.loopId++;
-      setWho(p, `Wins on turn ${Lc.turn}!`);
-      showWinner(p, Lc.turn, "Play again");
-    } else {
-      Lc.current = (Lc.current + 1) % pieces.length;
-      currentIdx = Lc.current;
-      const nx = pieces[Lc.current];
-      markCurrent(nx);
-      if (!Lc.playing) setWho(nx, `Up next on ${nx.pos || "start"}.`);
-    }
+    setWho(null, "Pick characters and who is a computer, then press Start.");
+    chipsClear();
     renderRoster();
-    Lc.busy = false; localButtons();
+    render();
   }
-  function localRun() { Lc.turnPromise = localTurn(); return Lc.turnPromise; }
-  const intervalMs = () => Math.round(parseFloat($("interval").value) * 1000);
+  async function newPreview() {
+    if (Lc.classic) { Lc.preview = RL.CLASSIC; drawFeatures(Lc.preview); render(); return; }
+    drawFeatures(Lc.preview || RL.CLASSIC);
+    try { Lc.preview = await api("GET", "/api/newboard"); }
+    catch (e) { Lc.preview = RL.CLASSIC; showErr("localErr", "Could not get a random board: " + e.message); }
+    if (Lc.setup && mode === "local") drawFeatures(Lc.preview);
+    render();
+  }
+  function renderLocal() {
+    const live = localLive(), s = G.s;
+    $("boardInfo").textContent = live ? boardLabel(s.board) : boardLabel(Lc.preview);
+    $("rerollBtn").disabled = live; $("classicBtn").disabled = live;
+    $("boardRow").hidden = live;
+    $("abilitiesChk").disabled = live; $("miniSel").disabled = live;
+    $("classicBtn").setAttribute("aria-pressed", String(Lc.classic));
+    $("classicBtn").textContent = Lc.classic ? "Random board" : "Classic board";
+    $("startBtn").textContent = live ? "New game" : "Start game";
+    const over = live && s.status === "over";
+    $("playBtn").disabled = !live || over;
+    $("playBtn").textContent = Lc.playing ? "⏸ Pause" : "▶ Play";
+    $("stepBtn").disabled = !live || over || Lc.playing || Lc.busy || busyAnim() || MG.busy || !!(s && s.mini);
+    if (live && !busyAnim() && !Lc.busy && s.status === "playing" && !s.mini) {
+      const cur = curSeat(), p = pieces[s.current];
+      if (p) setWho(p, cur.cpu ? (Lc.playing ? "Computer is up next." : `Up next on ${p.pos || "start"}. Press Play or Step.`)
+        : `Your turn, ${p.name}! Spin${s.abilities ? " or use your ability" : ""}.`);
+    }
+  }
+  async function soloStart() {
+    const n = nPlayers();
+    const body = { seats: Array.from({ length: n }, (_, i) => ({ char: picks[i], name: names[i] || "", cpu: isCpu(i) })),
+      board: Lc.preview || RL.CLASSIC, ...localSettings() };
+    const code = store.get("cl.solo", "");
+    if (/^[A-Z]{5}$/.test(code)) {
+      try { return await api("POST", `/api/rooms/${code}/start`, body); }
+      catch (e) { if (e.status !== 404 && e.status !== 403) throw e; }
+    }
+    const v = await api("POST", "/api/rooms", { solo: true, ...body });
+    store.set("cl.solo", v.code);
+    return v;
+  }
+  async function localStart() {
+    if (localLive()) { localIdle(); return; }      // "New game": back to setup to re-roll the board
+    Lc.loopId++; Lc.playing = false;
+    $("startBtn").disabled = true;
+    try {
+      const v = await soloStart();
+      enterSolo(v);
+      localSetPlaying(true);
+    } catch (e) { showErr("localErr", e.message); }
+    finally { $("startBtn").disabled = false; }
+  }
+  async function playAgain() {                      // banner button: fresh game straight away
+    Lc.setup = true; G.s = null;
+    if (!Lc.classic) { try { Lc.preview = await api("GET", "/api/newboard"); } catch { Lc.preview = RL.CLASSIC; } }
+    localStart();
+  }
+  function enterSolo(v) {
+    Lc.setup = false;
+    G.code = v.code; G.solo = true; G.s = null; G.game = null; G.pollToken++;
+    handleState(v);
+  }
+  // CPU turns at the interval; stops on a Human seat's turn and waits for Spin.
   async function autoLoop(id) {
-    if (Lc.turnPromise) await Lc.turnPromise;   // never overlap a turn already in flight
-    while (Lc.playing && id === Lc.loopId && !Lc.winner && mode === "local") {
-      await localRun();
-      if (!Lc.playing || id !== Lc.loopId || Lc.winner) break;
+    await idle();
+    while (Lc.playing && id === Lc.loopId && localLive()) {
+      const s = G.s;
+      if (s.status !== "playing") break;
+      if (s.mini || MG.busy) { await sleep(150); continue; }
+      if (!curSeat().cpu) { render(); return; }    // a person's turn: wait for their Spin
+      await localStep();
+      if (!Lc.playing || id !== Lc.loopId) break;
       const t0 = performance.now();
       while (performance.now() - t0 < intervalMs()) {   // re-read so slider changes apply mid-wait
         if (!Lc.playing || id !== Lc.loopId) return;
         await sleep(50);
       }
     }
+    if (G.s && G.s.status === "over") { Lc.playing = false; render(); }
   }
+  function localKick() { if (Lc.playing && localLive()) autoLoop(++Lc.loopId); }
+  async function localStep() {
+    if (!localLive() || Lc.busy || G.s.status !== "playing" || G.s.mini) return;
+    Lc.busy = true; render();
+    try { handleState(await api("POST", `/api/rooms/${G.code}/spin`, { expect: G.s.seq ?? G.s.turn })); }
+    catch (e) { showErr("localErr", e.message); if (e.status === 404) { Lc.playing = false; localIdle(); } else if (e.status === 409) await refresh(); }
+    finally { Lc.busy = false; }
+    await idle();
+    render();
+  }
+  const intervalMs = () => Math.round(parseFloat($("interval").value) * 1000);
   function localSetPlaying(on) {
-    if (Lc.winner || mode !== "local") on = false;
+    if (!localLive() || G.s.status !== "playing") on = false;
     Lc.playing = on; Lc.loopId++;
-    localButtons();
-    if (on) { $("startBtn").textContent = "New game"; autoLoop(Lc.loopId); }
-    else if (!Lc.winner && !Lc.busy && Lc.turn > 0) setWho(pieces[Lc.current], `Paused. Up next on ${pieces[Lc.current].pos || "start"}.`);
-  }
-  function localButtons() {
-    const live = !Lc.winner;
-    $("playBtn").disabled = !live;
-    $("playBtn").textContent = Lc.playing ? "⏸ Pause" : "▶ Play";
-    $("stepBtn").disabled = !live || Lc.playing || Lc.busy;
-  }
-  async function localStart() {
-    Lc.loopId++; Lc.playing = false;
-    if (Lc.turnPromise) await Lc.turnPromise;   // let an in-flight animation land before resetting
-    localNew(nPlayers());
-    $("startBtn").textContent = "New game";
-    localSetPlaying(true);
+    render();
+    if (on) autoLoop(Lc.loopId);
   }
   function syncInterval() {
     const v = parseFloat($("interval").value);
     $("intervalOut").textContent = v === 0 ? "none" : v.toFixed(1) + " s";
     store.set("cl.interval", v);
   }
+  // Reload: resume this screen's solo game if one is in progress.
+  async function resumeSolo() {
+    const code = store.get("cl.solo", "");
+    if (!/^[A-Z]{5}$/.test(code)) return false;
+    try {
+      const v = await api("GET", `/api/rooms/${code}`);
+      if (!v.solo || v.status !== "playing" || mode !== "local") return false;
+      $("players").value = v.seats.length;
+      v.seats.forEach((x, i) => { picks[i] = x.char; names[i] = x.name || ""; cpus[i] = !!x.cpu; });
+      fillPicks();
+      store.set("cl.names", JSON.stringify(names)); store.set("cl.cpu", JSON.stringify(cpus.slice(0, 6)));
+      $("abilitiesChk").checked = !!v.abilities; $("miniSel").value = String(v.miniEvery);
+      renderPicks();
+      enterSolo(v);
+      setWho(v.mini ? null : pieces[v.current], v.mini ? "Game resumed. Minigame time!" : "Game resumed. Press Play or Step.");
+      return true;
+    } catch { return false; }
+  }
 
   // ================= ONLINE MODE (rooms) =================
-  let clientId = store.get("cl.client", "");
-  if (!/^[0-9a-f]{32}$/.test(clientId)) {
-    clientId = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join("");
-    store.set("cl.client", clientId);
-  }
-  const On = { code: null, s: null, game: null, lastN: 0, queue: [], animating: false, offset: 0, pollToken: 0, layoutKey: "" };
-  const serverNow = () => (Date.now() + On.offset) / 1000;
-  async function api(method, path, body) {
-    const r = await fetch(path, {
-      method, headers: { "X-Client-Id": clientId, ...(body ? { "Content-Type": "application/json" } : {}) },
-      body: body ? JSON.stringify(body) : undefined, cache: "no-store"
-    });
-    let data = {};
-    try { data = await r.json(); } catch {}
-    if (!r.ok) { const e = new Error(data.error || `Server error (${r.status}).`); e.status = r.status; throw e; }
-    return data;
-  }
-  let errTimer;
-  function showErr(id, msg) {
-    $(id).textContent = msg || "";
-    clearTimeout(errTimer);
-    if (msg) errTimer = setTimeout(() => { $(id).textContent = ""; }, 6000);
-  }
   async function createRoom() {
     $("createRoom").disabled = true;
     try { enterRoom(await api("POST", "/api/rooms", { char: picks[0], name: myName() })); }
@@ -844,20 +1607,25 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   async function joinRoom(code) {
     code = (code || "").trim().toUpperCase();
     if (!/^[A-Z]{5}$/.test(code)) return showErr("lobbyErr", "Room codes are 5 letters.");
-    try { enterRoom(await api("GET", `/api/rooms/${code}`)); }
+    try {
+      const v = await api("GET", `/api/rooms/${code}`);
+      if (v.solo) return showErr("lobbyErr", "That code is a one-screen game.");
+      enterRoom(v);
+    }
     catch (e) { showErr("lobbyErr", e.message); }
   }
   function enterRoom(s) {
     setMode("online", true);
-    On.code = s.code; On.s = null; On.game = null; On.queue = []; On.lastN = 0;
+    G.code = s.code; G.solo = false; G.s = null; G.game = null; G.queue = []; G.lastN = 0;
     history.replaceState(null, "", `?room=${s.code}`);
     $("lobbyCard").hidden = true; $("roomCard").hidden = false;
     $("roomCode").textContent = s.code;
     handleState(s);
-    pollLoop(++On.pollToken);
+    pollLoop(++G.pollToken);
   }
   function leaveRoom() {
-    On.pollToken++; On.code = null; On.s = null; On.game = null; On.queue = [];
+    G.pollToken++; G.code = null; G.s = null; G.game = null; G.queue = [];
+    if (MG.abort) MG.abort.abort();
     history.replaceState(null, "", location.pathname);
     $("lobbyCard").hidden = false; $("roomCard").hidden = true;
     hideBanner();
@@ -867,14 +1635,14 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   }
   async function pollLoop(token) {
     let fails = 0;
-    while (On.code && token === On.pollToken) {
+    while (G.code && token === G.pollToken) {
       await sleep(document.hidden ? 4000 : 1000);
-      if (!On.code || token !== On.pollToken) return;
+      if (!G.code || token !== G.pollToken) return;
       try {
-        const r = await api("GET", `/api/rooms/${On.code}?v=${On.s ? On.s.v : ""}`);
-        if (token !== On.pollToken) return;
+        const r = await api("GET", `/api/rooms/${G.code}?v=${G.s ? G.s.v : ""}`);
+        if (token !== G.pollToken) return;
         fails = 0;
-        if (r.same) { On.offset = r.now * 1000 - Date.now(); renderOnline(); }
+        if (r.same) { G.offset = r.now * 1000 - Date.now(); render(); }
         else handleState(r);
       } catch (e) {
         if (e.status === 404) { showErr("roomErr", e.message); leaveRoom(); showErr("lobbyErr", e.message); return; }
@@ -888,97 +1656,29 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     store.set("cl.name", v);
     for (const id of ["lobbyName", "seatName"]) if (document.activeElement !== $(id)) $(id).value = v;
   }
-  const seatPieceList = s => s.seats.map(seat => ({ key: seat.id, color: seat.color, char: seat.char, name: seat.name, pos: seat.pos,
-    ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins, mine: seat.mine }));
-  const layoutKeyOf = s => s.seats.map(x => x.id + x.color).join("|");
-  function handleState(s) {
-    On.offset = s.now * 1000 - Date.now();
-    const fresh = !On.s || s.game !== On.game;
-    On.s = s;
-    if (fresh) {                                    // first load, or host started a new round: snap, no replay
-      On.game = s.game; On.queue = [];
-      On.lastN = s.events.reduce((m, e) => Math.max(m, e.n), 0);
-      snapToState();
-      $("log").innerHTML = "";
-      for (const ev of s.events) {
-        const p = pieces.find(q => q.key === ev.seat);
-        if (p) { const [h, c] = logText(ev); addLog(ev.n, p, h, c); }
-      }
-    } else {
-      for (const ev of s.events) if (ev.n > On.lastN) On.queue.push(ev);
-      On.lastN = s.events.reduce((m, e) => Math.max(m, e.n), On.lastN);
-      // Character swaps apply live; seats joining/leaving rebuild once nothing is animating.
-      s.seats.forEach(seat => { const p = pieces.find(q => q.key === seat.id); if (p) { setPieceChar(p, seat.char); setPieceName(p, seat.name); p.mine = seat.mine; } });
-      if (!On.animating && !On.queue.length && layoutKeyOf(s) !== On.layoutKey) snapToState();
-    }
-    drainQueue();
-    renderOnline();
-  }
-  function snapToState() {
-    const s = On.s;
-    hideBanner();
-    buildPieces(seatPieceList(s));
-    On.layoutKey = layoutKeyOf(s);
-    syncTurnMarkers();
-  }
-  function syncTurnMarkers() {
-    const s = On.s;
-    winnerIdx = s.winner ? s.seats.findIndex(x => x.id === s.winner) : -1;
-    currentIdx = s.status === "playing" ? s.current : -1;
-    markCurrent(pieces[currentIdx] || null);
-    renderRoster();
-    if (s.status === "over" && winnerIdx > -1) showWinner(pieces[winnerIdx], s.turn, s.isHost ? "Play again" : "");
-    else hideBanner();
-  }
-  async function drainQueue() {
-    if (On.animating) return;
-    On.animating = true;
-    const game = On.game;
-    renderOnline();
-    while (On.queue.length && game === On.game && mode === "online") {
-      const ev = On.queue.shift(), p = pieces.find(q => q.key === ev.seat);
-      if (p) await animateMove(p, ev);
-    }
-    On.animating = false;
-    if (game !== On.game || !On.s || mode !== "online") return;
-    // Reconcile with the server's truth (covers anything we could not animate).
-    const s = On.s;
-    if (layoutKeyOf(s) !== On.layoutKey) snapToState();
-    else {
-      s.seats.forEach(seat => {
-        const p = pieces.find(q => q.key === seat.id);
-        if (p) Object.assign(p, { pos: seat.pos, ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins });
-      });
-      await settleAll();
-      syncTurnMarkers();
-    }
-    renderOnline();
-  }
   function renderOnline() {
-    const s = On.s;
-    if (!s || mode !== "online") return;
+    const s = G.s;
+    if (!s || mode !== "online" || s.solo) return;
     const nameOf = seat => seat.name || charOf(seat.char).name;
-    const cur = s.status === "playing" ? s.seats[s.current] : null;
+    const cur = curSeat();
     const mineCount = s.seats.filter(x => x.mine).length;
-    const busy = On.animating || On.queue.length > 0;
-    const ready = !busy && serverNow() >= s.readyAt - 0.3;
+    const busy = busyAnim();
+    const ready = !busy && serverNow() >= s.readyAt - 0.3 && !s.mini;
+    const preGame = s.status !== "playing";
 
     // seats: rebuilt only when something visible changed, and never while you are typing a name
     const ul = $("seats");
-    const key = JSON.stringify([s.status, s.isHost, cur && cur.id, s.seats.map(x => [x.id, x.name, x.char, x.color, x.mine])]);
+    const key = JSON.stringify([s.status, s.isHost, cur && cur.id, s.seats.map(x => [x.id, x.name, x.char, x.color, x.mine, x.cpu])]);
     if (key !== ul.dataset.key && !ul.contains(document.activeElement)) {
       ul.dataset.key = key;
-      ul.innerHTML = "";
+      ul.replaceChildren();
       s.seats.forEach((seat, i) => {
-        const ch = charOf(seat.char), li = document.createElement("li");
-        if (cur && seat.id === cur.id) li.className = "turn";
-        const canRemove = s.status !== "playing" && (seat.mine || s.isHost);
+        const ch = charOf(seat.char), ab = abInfo(seat.char), li = h("li", { class: cur && seat.id === cur.id ? "turn" : "" });
+        const canRemove = preGame && (seat.mine || s.isHost);
         if (seat.mine) {
-          li.innerHTML = `<button class="seat pick" aria-label="Change your character (${esc(ch.name)})" title="${esc(ch.name)}: tap to change">` +
-            `${avatar(ch.img, seat.color)}</button>` +
-            `<input class="name" maxlength="20" autocomplete="off" placeholder="${esc(ch.name)}" aria-label="Your name">` +
-            `<span class="you">you</span>`;
-          const inp = li.querySelector("input");
+          const pick = h("button", { class: "seat pick", "aria-label": `Change your character (${ch.name}, ${ab.flavor})`, title: `${ch.name}, ${ab.flavor}: tap to change` },
+            avEl(ch.img, seat.color));
+          const inp = h("input", { class: "name", maxlength: 20, autocomplete: "off", placeholder: ch.name, "aria-label": "Your name" });
           inp.value = seat.name || "";
           const commit = () => {
             const v = cleanName(inp.value);
@@ -986,77 +1686,128 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
           };
           inp.addEventListener("change", commit);
           inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
-          li.querySelector(".seat").onclick = () => {
+          pick.onclick = () => {
+            if (!preGame) return showErr("roomErr", "Characters are locked once the game starts.");
             const taken = {};
             s.seats.forEach((o, j) => { if (o.id !== seat.id) taken[o.char] = { label: o.name || "P" + (j + 1), color: o.color }; });
             openPicker("Pick your character", seat.char, taken, id => roomAction("char", { seat: seat.id, char: id }));
           };
+          li.append(pick, inp, h("span", { class: "you", text: "you" }));
         } else {
-          li.innerHTML = `<div class="seat">${avatar(ch.img, seat.color)}<span class="who2"><b>${esc(nameOf(seat))}</b>` +
-            `${seat.name ? `<small>${esc(ch.name)}</small>` : ""}</span></div>`;
+          li.append(h("div", { class: "seat" }, avEl(ch.img, seat.color), h("span", { class: "who2" }, h("b", { text: nameOf(seat) }),
+            h("small", { text: `${seat.name ? ch.name + " · " : ""}${ab.icon} ${ab.flavor}` }))));
         }
-        if (canRemove) {
-          const x = document.createElement("button");
-          x.className = "x"; x.title = "Remove"; x.textContent = "✕";
-          x.setAttribute("aria-label", `Remove ${nameOf(seat)}`);
-          x.onclick = () => roomAction("leave", { seat: seat.id });
-          li.appendChild(x);
+        if (s.isHost || seat.mine) {
+          const tog = h("button", { class: "cpu-tog" + (seat.cpu ? "" : " human"), text: seat.cpu ? "CPU" : "Human", "aria-pressed": String(!!seat.cpu),
+            title: seat.cpu ? "The computer plays this seat. Tap to hand it back to a person." : "Tap to let the computer play this seat (for someone who left).",
+            "aria-label": `${nameOf(seat)}: ${seat.cpu ? "computer" : "human"}. Toggle`,
+            onclick: () => roomAction("cpu", { seat: seat.id, cpu: !seat.cpu }) });
+          li.appendChild(tog);
         }
+        if (canRemove) li.appendChild(h("button", { class: "x", title: "Remove", text: "✕", "aria-label": `Remove ${nameOf(seat)}`,
+          onclick: () => roomAction("leave", { seat: seat.id }) }));
         ul.appendChild(li);
       });
-      if (!s.seats.length) ul.innerHTML = '<li class="hint">Nobody has joined yet.</li>';
+      if (!s.seats.length) ul.replaceChildren(h("li", { class: "hint", text: "Nobody has joined yet." }));
     }
 
     $("joinSeatRow").hidden = !(s.status === "lobby" && s.seats.length < 6);
     $("seatName").hidden = mineCount > 0;
     $("joinSeat").textContent = mineCount ? "+ Add another player on this device" : "Join";
 
-    const myTurn = !!(cur && cur.mine);
-    $("spinRow").hidden = !myTurn;
-    $("spinBtn").disabled = !ready;
-    $("spinBtn").classList.toggle("go", myTurn && ready);
-    $("spinBtn").textContent = mineCount > 1 ? `Spin for ${nameOf(cur || s.seats[0])}!` : "Spin!";
-
     $("hostBox").hidden = !s.isHost;
     $("hostStart").textContent = s.status === "lobby" ? "Start game" : s.status === "over" ? "Play again" : "Restart";
     $("hostStart").disabled = !s.seats.length;
-    $("hostSpin").hidden = !(cur && !cur.mine);
-    $("hostSpin").disabled = !ready;
+    $("hostSpin").hidden = !(cur && !cur.mine && !cur.cpu);
+    $("hostSpin").disabled = !ready || G.sending;
     if (cur && !cur.mine) $("hostSpin").textContent = `Spin for ${nameOf(cur)}`;
     if (document.activeElement !== $("autoSpin")) { $("autoSpin").value = s.autoSpin; syncAutoSpinOut(); }
+    $("hostPre").hidden = !preGame;
+    $("hBoardInfo").textContent = boardLabel(s.board);
+    $("hClassic").setAttribute("aria-pressed", String(s.board && s.board.kind === "classic"));
+    if (document.activeElement !== $("hAbilities")) $("hAbilities").checked = !!s.abilities;
+    if (document.activeElement !== $("hMini")) $("hMini").value = String(s.miniEvery);
+    $("roomRules").textContent = `${boardLabel(s.board)} Abilities ${s.abilities ? "on" : "off"}. ` +
+      (s.miniEvery ? `Minigame every ${s.miniEvery} rounds.` : "No minigames.");
 
     let status;
     if (s.status === "lobby") status = s.isHost ? "Send the link, wait for everyone to pick a character, then Start." : "Waiting for the host to start the game.";
-    else if (s.status === "over") status = "Game over." + (s.isHost ? " Play again keeps the same players." : " Waiting for the host to start another round.");
-    else status = `Turn ${s.turn + 1}. ${s.autoSpin ? `Auto-spin after ${s.autoSpin}s of waiting.` : ""}`;
+    else if (s.status === "over") status = "Game over." + (s.isHost ? " Play again keeps the same players (re-roll the board first if you like)." : " Waiting for the host to start another round.");
+    else status = `Round ${(s.round || 0) + 1}, turn ${s.turn + 1}. ${s.autoSpin ? `Auto-spin after ${s.autoSpin}s of waiting.` : ""}`;
     $("roomStatus").textContent = status;
 
     if (busy) return;                             // the animation owns the turn text while it runs
     if (s.status === "lobby") setWho(null, s.seats.length ? `${s.seats.length} player${s.seats.length > 1 ? "s" : ""} in the room.` : "Waiting for players.");
-    else if (cur) {
+    else if (cur && !s.mini) {
       const p = pieces[s.current];
       if (!p) return;
-      let msg = myTurn ? "Your turn! Hit Spin." : `Waiting for ${nameOf(cur)} to spin.`;
-      if (s.autoSpin && ready) {
+      const myTurn = cur.mine && !cur.cpu;
+      let msg = myTurn ? `Your turn! Hit Spin${s.abilities ? " or use your ability" : ""}.` : cur.cpu ? `${nameOf(cur)} (computer) is spinning…` : `Waiting for ${nameOf(cur)} to spin.`;
+      if (s.autoSpin && ready && !cur.cpu) {
         const left = Math.max(0, Math.ceil(s.readyAt + s.autoSpin - serverNow()));
         msg += ` Auto-spin in ${left}s.`;
       }
       setWho(p, msg);
-    }
+    } else if (s.mini) setWho(null, "Minigame in progress…");
   }
-  async function roomAction(action, body = {}) {
-    if (!On.code) return;
-    try { handleState(await api("POST", `/api/rooms/${On.code}/${action}`, body)); }
-    catch (e) { showErr("roomErr", e.message); }
-  }
-  function onlineSpin() {
-    if (!On.s || $("spinRow").hidden && $("hostSpin").hidden) return;
-    $("spinBtn").disabled = $("hostSpin").disabled = true;
-    roomAction("spin", { expect: On.s.turn });
+  function hostSpin() {
+    if (!G.s || $("hostSpin").hidden) return;
+    doSpin({});
   }
   function syncAutoSpinOut() {
     const v = +$("autoSpin").value;
     $("autoSpinOut").textContent = v ? `after ${v}s` : "off";
+  }
+
+  // ================= Update pill =================
+  let updateShown = false;
+  function checkBuild(b) {
+    if (!b || !RL.BUILD || b === RL.BUILD || updateShown) return;
+    updateShown = true;
+    const local = mode === "local" && localLive() && G.s.status === "playing";
+    $("updPill").textContent = "New version available. Tap to update" + (local ? " (your game resumes after)" : "");
+    $("updPill").hidden = false;
+  }
+  async function pollVersion() {
+    if (G.code && !G.solo && mode === "online") return;   // room polls already carry build
+    try { const r = await fetch("/version", { cache: "no-store" }); const d = await r.json(); checkBuild(d.build); } catch {}
+  }
+
+  // ================= Suggestion box =================
+  function openSuggest() {
+    $("sgMsg").textContent = "";
+    openModal("sg", $("sgText"));
+    syncSgCount();
+    loadSuggestions();
+  }
+  function syncSgCount() {
+    const n = $("sgText").value.length;
+    $("sgCount").textContent = `${n} / 500`;
+    $("sgSend").disabled = n < 10;
+  }
+  async function sendSuggestion() {
+    const text = $("sgText").value.trim();
+    if (text.length < 10) { $("sgMsg").textContent = "Please write at least 10 characters."; return; }
+    $("sgSend").disabled = true;
+    try {
+      const r = await api("POST", "/api/suggest", { text });
+      $("sgMsg").className = "ok"; $("sgMsg").textContent = r.message || "Thanks! Your suggestion was sent.";
+      $("sgText").value = ""; syncSgCount();
+      loadSuggestions();
+    } catch (e) { $("sgMsg").className = "err"; $("sgMsg").textContent = e.message; }
+    finally { syncSgCount(); }
+  }
+  async function loadSuggestions() {
+    const ul = $("sgList");
+    try {
+      const r = await api("GET", "/api/suggest");
+      ul.replaceChildren();
+      for (const it of (r.items || [])) {
+        ul.appendChild(h("li", {}, h("span", { class: `chip st-${String(it.status).replace(/[^a-z]/g, "")}`, text: it.status }),
+          h("span", { class: "sg-t", text: it.text }), it.note ? h("small", { text: it.note }) : null));
+      }
+      if (!ul.children.length) ul.appendChild(h("li", { class: "hint", text: "No suggestions yet." }));
+    } catch (e) { ul.replaceChildren(h("li", { class: "hint", text: e.status === 404 ? "Suggestions are not open yet." : e.message })); }
   }
 
   // ================= Mode switching =================
@@ -1072,39 +1823,54 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
     $("onlinePanel").hidden = m !== "online";
     hideBanner();
     $("log").innerHTML = "";
+    Lc.loopId++; Lc.playing = false;
+    if (MG.abort) MG.abort.abort();
     if (m === "local") {
-      if (On.code) leaveRoom();
-      localIdle();
+      if (G.code && !G.solo) leaveRoom();
+      localIdle(true);
+      resumeSolo();
     } else {
-      Lc.loopId++; Lc.playing = false;
-      if (!On.code) {
-        buildPieces([]); currentIdx = winnerIdx = -1; renderRoster();
-        setWho(null, "Create a room, or join one with its code.");
-      }
+      G.pollToken++; G.code = null; G.s = null; G.solo = false;
+      buildPieces([]); currentIdx = winnerIdx = -1; renderRoster();
+      drawFeatures(RL.CLASSIC);
+      setWho(null, "Create a room, or join one with its code.");
+      render();
     }
   }
 
   // ---------- Wire up ----------
   drawBoard();
   drawSpinner();
+  buildPickRow();
+  $("helpText").textContent = helpText();
   $("players").value = clampPlayers(store.get("cl.players", 3));
   $("interval").value = Math.min(5, Math.max(0, parseFloat(store.get("cl.interval", 1)) || 0));
+  $("abilitiesChk").checked = store.get("cl.abilities", "1") === "1";
+  $("miniSel").value = ["0", "2", "3", "4", "5"].includes(store.get("cl.mini", "3")) ? store.get("cl.mini", "3") : "3";
   syncInterval();
   $("interval").addEventListener("input", syncInterval);
   const setPlayers = v => {
     $("players").value = clampPlayers(v); store.set("cl.players", $("players").value);
     renderPicks();
-    // Not started yet: redraw the waiting pieces. Mid-game: the new count applies on New game.
-    if (mode === "local" && Lc.turn === 0 && !Lc.busy && !Lc.playing) localIdle();
+    if (mode === "local" && !localLive()) localIdle(true);   // mid-game: the new count applies on New game
   };
   $("minus").onclick = () => setPlayers(+$("players").value - 1);
   $("plus").onclick = () => setPlayers(+$("players").value + 1);
   $("players").addEventListener("change", e => setPlayers(e.target.value));
   $("startBtn").onclick = localStart;
   $("playBtn").onclick = () => localSetPlaying(!Lc.playing);
-  $("stepBtn").onclick = () => { if (!Lc.playing) localRun(); };
+  $("stepBtn").onclick = () => { if (!Lc.playing) localStep(); };
   $("shuffleBtn").onclick = () => { picks = []; fillPicks(); applyPicks(); };
-  $("againBtn").onclick = () => { if (mode === "local") localStart(); else roomAction("start"); };
+  $("rerollBtn").onclick = () => { if (localLive()) return; Lc.classic = false; store.set("cl.boardMode", "random"); Lc.preview = null; newPreview(); };
+  $("classicBtn").onclick = () => {
+    if (localLive()) return;
+    Lc.classic = !Lc.classic; store.set("cl.boardMode", Lc.classic ? "classic" : "random");
+    if (!Lc.classic) Lc.preview = null;
+    newPreview();
+  };
+  $("abilitiesChk").onchange = () => { store.set("cl.abilities", $("abilitiesChk").checked ? "1" : "0"); if (!localLive()) { showPips = $("abilitiesChk").checked; renderRoster(); } };
+  $("miniSel").onchange = () => store.set("cl.mini", $("miniSel").value);
+  $("againBtn").onclick = () => { hideBanner(); if (mode === "local") playAgain(); else roomAction("start"); };
   $("closeBanner").onclick = hideBanner;
   $("pickerClose").onclick = closePicker;
   $("picker").addEventListener("click", e => { if (e.target === $("picker")) closePicker(); });
@@ -1114,43 +1880,60 @@ input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset
   $("joinRoom").onclick = () => joinRoom($("joinCode").value);
   $("joinCode").addEventListener("keydown", e => { if (e.key === "Enter") joinRoom($("joinCode").value); });
   $("joinSeat").onclick = () => {
-    const taken = new Set((On.s ? On.s.seats : []).map(x => x.char));
+    const taken = new Set((G.s ? G.s.seats : []).map(x => x.char));
     // A second seat on the same device starts unnamed so it does not copy your name.
-    const mine = On.s && On.s.seats.some(x => x.mine);
+    const mine = G.s && G.s.seats.some(x => x.mine);
     roomAction("join", { char: picks.find(id => !taken.has(id)), name: mine ? "" : myName() });
   };
   for (const id of ["lobbyName", "seatName"]) {
     $(id).value = myName();
     $(id).addEventListener("input", () => setMyName($(id).value));
   }
-  $("spinBtn").onclick = onlineSpin;
-  $("hostSpin").onclick = onlineSpin;
+  $("spinBtn").onclick = () => doSpin({});
+  $("abBtn").onclick = abClick;
+  $("hostSpin").onclick = hostSpin;
   $("hostStart").onclick = () => {
-    if (On.s && On.s.status === "playing" && !confirm("Restart the game from the beginning?")) return;
+    if (G.s && G.s.status === "playing" && !confirm("Restart the game from the beginning?")) return;
     roomAction("start");
   };
+  $("hReroll").onclick = () => roomAction("board", { mode: "random" });
+  $("hClassic").onclick = () => roomAction("board", { mode: "classic" });
+  $("hAbilities").onchange = () => roomAction("settings", { abilities: $("hAbilities").checked });
+  $("hMini").onchange = () => roomAction("settings", { miniEvery: +$("hMini").value });
   $("autoSpin").addEventListener("input", syncAutoSpinOut);
   $("autoSpin").addEventListener("change", () => roomAction("settings", { autoSpin: +$("autoSpin").value }));
   $("leaveRoom").onclick = () => setMode("local");
   $("copyLink").onclick = async () => {
-    const url = `${location.origin}${location.pathname}?room=${On.code}`;
+    const url = `${location.origin}${location.pathname}?room=${G.code}`;
     try { await navigator.clipboard.writeText(url); $("copyLink").textContent = "Copied!"; }
     catch { prompt("Copy this link:", url); }
     setTimeout(() => { $("copyLink").textContent = "Copy link"; }, 1600);
   };
+  $("updPill").onclick = () => location.reload();
+  $("suggestBtn").onclick = openSuggest;
+  $("sgClose").onclick = () => closeModal("sg");
+  $("sg").addEventListener("click", e => { if (e.target === $("sg")) closeModal("sg"); });
+  $("sgText").addEventListener("input", syncSgCount);
+  $("sgSend").onclick = sendSuggestion;
   document.addEventListener("keydown", e => {
     if (!$("picker").hidden) { if (e.key === "Escape") closePicker(); return; }
-    if (e.target.closest("input, button")) return;   // focused controls keep their own keys
-    if (mode === "local") {
-      if (e.key === " ") { e.preventDefault(); if (!Lc.winner) localSetPlaying(!Lc.playing); }
-      else if (e.key === "ArrowRight" && !Lc.playing) { e.preventDefault(); localRun(); }
-    } else if (e.key === " " && !$("spinRow").hidden && !$("spinBtn").disabled) { e.preventDefault(); onlineSpin(); }
+    if (!$("sg").hidden) { if (e.key === "Escape") closeModal("sg"); return; }
+    if (!$("mg").hidden) return;                  // the minigame owns the keyboard
+    if (e.target.closest("input, button, select, textarea, summary")) return;   // focused controls keep their own keys
+    const canSpin = !$("spinActs").hidden && !$("spinBtn").disabled;
+    if (e.key === " " && canSpin) { e.preventDefault(); doSpin({}); }
+    else if (mode === "local") {
+      if (e.key === " ") { e.preventDefault(); localSetPlaying(!Lc.playing); }
+      else if (e.key === "ArrowRight" && !Lc.playing) { e.preventDefault(); localStep(); }
+    }
   });
+  setInterval(() => { if (mode === "online" && G.s) renderOnline(); }, 1000);
+  setInterval(pollVersion, 60000);
 
   renderPicks();
   const roomParam = new URLSearchParams(location.search).get("room");
   if (roomParam) { setMode("online"); $("joinCode").value = roomParam.toUpperCase(); joinRoom(roomParam); }
-  else localIdle();
+  else { localIdle(); resumeSolo(); }
 })();
 </script>
 </body>

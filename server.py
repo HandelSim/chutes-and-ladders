@@ -79,7 +79,8 @@ _build_cache = {"key": None, "build": None}
 # ---------- persistence ----------
 def db():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DATA_DIR / "rooms.db", check_same_thread=False)
+    conn = sqlite3.connect(DATA_DIR / "rooms.db", check_same_thread=False, timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL")       # readers (backups, tools) never block a save
     conn.execute("CREATE TABLE IF NOT EXISTS rooms (code TEXT PRIMARY KEY, json TEXT NOT NULL, updated REAL NOT NULL)")
     return conn
 
@@ -256,7 +257,7 @@ def reset_positions(room):
 
 def view(room, client):
     seats = [{k: s[k] for k in ("id", "name", "char", "color", "pos", "spins", "ladders", "chutes", "charges", "cpu")}
-             | {"shield": int(s.get("shield") or 0), "mine": s["owner"] == client}
+             | {"shield": int(s.get("shield") or 0), "steady": bool(s.get("steady")), "mine": s["owner"] == client}
              for s in room["seats"]]
     m = room.get("mini")
     mini = m and {k: m[k] for k in ("id", "kind", "seed", "startAt", "deadline")} | {"submitted": list(m["scores"])}
