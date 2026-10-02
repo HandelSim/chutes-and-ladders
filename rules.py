@@ -165,6 +165,38 @@ def spawn_boss(room, seat, steps):
                   "hp": BOSS_HP, "max": BOSS_HP})
 
 
+# ---------- lucky and unlucky squares ----------
+# A few marked squares (never a chute, ladder or boss square). Ending a move on a lucky
+# square carries you SPECIAL_MOVE forward, on an unlucky square back. No chain reactions.
+# Stored in room["board"]["specials"] = {"lucky": [..], "unlucky": [..]}.
+SPECIAL_COUNT = 3
+SPECIAL_MOVE = 3
+
+
+def spawn_specials(room, seat, steps):
+    """Pick the marked squares the first time anyone plays (also covers older games)."""
+    board = room.get("board") or CLASSIC
+    if "specials" in board:
+        return
+    board = room["board"] = dict(board)
+    lad, chu = board_of(room)
+    used = set(lad) | set(lad.values()) | set(chu) | set(chu.values())
+    boss = board.get("boss")
+    if boss:
+        used.add(boss["sq"])
+    lucky = RNG.sample([n for n in range(5, 91) if n not in used], SPECIAL_COUNT)
+    used.update(lucky)
+    unlucky = RNG.sample([n for n in range(5, 99) if n not in used], SPECIAL_COUNT)
+    board["specials"] = {"lucky": sorted(lucky), "unlucky": sorted(unlucky)}
+    steps.append({"t": "special", "do": "spawn", "seat": seat["id"],
+                  "lucky": board["specials"]["lucky"], "unlucky": board["specials"]["unlucky"]})
+
+
+def special_at(room, sq):
+    sp = (room.get("board") or {}).get("specials") or {}
+    return "lucky" if sq in sp.get("lucky", ()) else "unlucky" if sq in sp.get("unlucky", ()) else None
+
+
 def gain_charge(room, seat, steps, why):
     if why == "chute" and not CHUTE_CHARGE:
         return
@@ -327,6 +359,7 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
     ev = {"n": room["seq"], "kind": "turn", "turn": room["turn"], "seat": seat["id"], "from": seat["pos"],
           "auto": auto, "ab": kind if use else None, "steps": steps}
     spawn_boss(room, seat, steps)
+    spawn_specials(room, seat, steps)
     if use:
         steps.append({"t": "ability", "seat": seat["id"], "ab": kind})
     if use and kind == "swap":
@@ -379,6 +412,11 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
         else:
             ev["via"] = move_by(room, seat, roll, steps)
             ev["land"] = before + roll if before + roll <= 100 else before
+            kindsq = special_at(room, seat["pos"]) if ev["via"] is None and seat["pos"] != before else None
+            if kindsq:
+                ev["special"] = kindsq
+                steps.append({"t": "special", "do": kindsq, "seat": seat["id"], "sq": seat["pos"]})
+                move_by(room, seat, SPECIAL_MOVE if kindsq == "lucky" else -SPECIAL_MOVE, steps, resolve=False)
     ev["to"] = seat["pos"]
     seat["spins"] += 1
     seat["steady"] = False

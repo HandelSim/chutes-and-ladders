@@ -562,7 +562,24 @@ details.help p{margin:6px 0 0}
       fill: "var(--muted)", "letter-spacing": 2 }, board);
     st.textContent = "START";
     featLayer = el("g", { id: "features" }, board);
+    specLayer = el("g", { id: "specLayer", "pointer-events": "none" }, board);
     bossLayer = el("g", { id: "bossLayer" }, board);
+  }
+  // Lucky (+3) and unlucky (-3) squares: {lucky:[..], unlucky:[..]}.
+  let specLayer;
+  function drawSpecials(sp) {
+    specLayer.replaceChildren();
+    if (!sp) return;
+    for (const [kind, icon, col] of [["lucky", "🍀", "#3fb950"], ["unlucky", "💀", "#a371f7"]]) {
+      for (const n of sp[kind] || []) {
+        const c = center(+n);
+        el("circle", { cx: c.x, cy: c.y, r: 30, fill: col, opacity: .35, stroke: col, "stroke-width": 4 }, specLayer);
+        const t = el("text", { x: c.x, y: c.y + 12, "text-anchor": "middle", "font-size": 32 }, specLayer);
+        t.textContent = icon;
+        const ti = el("title", {}, specLayer);
+        ti.textContent = kind === "lucky" ? `Lucky square ${n}: jump forward 3.` : `Unlucky square ${n}: slip back 3.`;
+      }
+    }
   }
   // The boss waiting on one square: {sq, hp, max}, or null once beaten / when there is none.
   let bossLayer, bossState = null;
@@ -589,6 +606,7 @@ details.help p{margin:6px 0 0}
   function drawFeatures(b) {
     if (!b || !Array.isArray(b.ladders) || !Array.isArray(b.chutes)) b = RL.CLASSIC;
     drawBoss(b.boss);
+    drawSpecials(b.specials);
     const key = JSON.stringify([b.ladders, b.chutes]);
     if (key === boardKey) return;
     boardKey = key;
@@ -919,6 +937,15 @@ details.help p{margin:6px 0 0}
           if (st.do === "defeat") bossState = null;
           renderBoss(true);
           await sleep(600 * SPEED);
+        }
+      } else if (st.t === "special") {
+        if (st.do === "spawn") {
+          drawSpecials(st);
+          setWho(p, "🍀 Lucky and 💀 unlucky squares are marked on the board.");
+          await sleep(600 * Math.max(SPEED, .6));
+        } else {
+          setWho(p, st.do === "lucky" ? "🍀 Lucky square! Jump forward 3." : "💀 Unlucky square! Slip back 3.");
+          await ringFx(p, st.do === "lucky" ? "#3fb950" : "#a371f7", 36);
         }
       } else if (st.t === "charge") {
         p.charges = st.n;
