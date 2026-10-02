@@ -128,6 +128,42 @@ def outcome(pos, roll, shield, bd):
 
 CHUTE_CHARGE = 1        # 1 = sliding down a chute earns a charge (comeback)
 
+# ---------- boss fight ----------
+# One boss waits on a random higher square (BOSS_LOW..BOSS_HIGH, never on a chute or ladder
+# end, always ahead of everyone when it appears). Nobody can move past it until it is
+# beaten: moves and ladders stop on its square. A player standing there spends their
+# spins attacking: a spin of BOSS_HIT or more takes one hit point off the shared boss.
+# Whoever lands the last hit earns a charge. It lives in room["board"]["boss"]
+# ({"sq","hp","max"}, or False when none fits) so clients get it with the board.
+BOSS_HP = 3
+BOSS_HIT = 3
+BOSS_LOW = 55
+BOSS_HIGH = 95
+
+
+def boss_of(room):
+    """The living boss, or None."""
+    b = (room.get("board") or {}).get("boss")
+    return b if b and b.get("hp", 0) > 0 else None
+
+
+def spawn_boss(room, seat, steps):
+    """Place the boss the first time anyone plays (also covers games started before bosses)."""
+    board = room.get("board") or CLASSIC
+    if "boss" in board:
+        return
+    board = room["board"] = dict(board)
+    lad, chu = board_of(room)
+    used = set(lad) | set(lad.values()) | set(chu) | set(chu.values())
+    top = max(s["pos"] for s in room["seats"])
+    options = [n for n in range(max(BOSS_LOW, top + 1), BOSS_HIGH + 1) if n not in used]
+    if not options or overtime(room):
+        board["boss"] = False
+        return
+    board["boss"] = {"sq": RNG.choice(options), "hp": BOSS_HP, "max": BOSS_HP}
+    steps.append({"t": "boss", "do": "spawn", "seat": seat["id"], "sq": board["boss"]["sq"],
+                  "hp": BOSS_HP, "max": BOSS_HP})
+
 
 def gain_charge(room, seat, steps, why):
     if why == "chute" and not CHUTE_CHARGE:
@@ -141,9 +177,15 @@ def after_land(room, seat, steps):
     p = seat["pos"]
     LADDERS, CHUTES = board_of(room)
     if p in LADDERS:
-        steps.append({"t": "ladder", "seat": seat["id"], "from": p, "to": LADDERS[p]})
-        seat["pos"] = LADDERS[p]
+        top, boss = LADDERS[p], boss_of(room)
+        blocked = bool(boss) and p < boss["sq"] < top
+        if blocked:
+            top = boss["sq"]
+        steps.append({"t": "ladder", "seat": seat["id"], "from": p, "to": top})
+        seat["pos"] = top
         seat["ladders"] += 1
+        if blocked:
+            steps.append({"t": "boss", "do": "block", "seat": seat["id"], "sq": top})
         return "ladder"
     if p in CHUTES:
         if seat.get("shield"):
@@ -163,6 +205,10 @@ def move_by(room, seat, n, steps, resolve=True):
     resolve is False). Overshooting 100 bounces (stay put); backwards stops at square 1."""
     frm = seat["pos"]
     dest = frm + n
+    boss = boss_of(room)
+    blocked = bool(boss) and n > 0 and frm <= boss["sq"] < dest
+    if blocked:
+        dest = boss["sq"]
     if dest > 100:
         steps.append({"t": "bounce", "seat": seat["id"]})
         return "bounce"
@@ -171,13 +217,17 @@ def move_by(room, seat, n, steps, resolve=True):
         return None
     steps.append({"t": "move", "seat": seat["id"], "from": frm, "to": dest})
     seat["pos"] = dest
+    if blocked:
+        steps.append({"t": "boss", "do": "block", "seat": seat["id"], "sq": dest})
     return after_land(room, seat, steps) if resolve else None
 
 
 def ahead_of(room, seat):
     """The nearest player strictly ahead (the swap target), or None."""
+    boss = boss_of(room)
     ahead = [s for s in room["seats"] if s["pos"] > seat["pos"] and s is not seat
-             and (not SWAP_RANGE or s["pos"] - seat["pos"] <= SWAP_RANGE)]
+             and (not SWAP_RANGE or s["pos"] - seat["pos"] <= SWAP_RANGE)
+             and not (boss and seat["pos"] <= boss["sq"] < s["pos"])]
     return min(ahead, key=lambda s: s["pos"]) if ahead else None
 
 
@@ -276,6 +326,7 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
     steps = []
     ev = {"n": room["seq"], "kind": "turn", "turn": room["turn"], "seat": seat["id"], "from": seat["pos"],
           "auto": auto, "ab": kind if use else None, "steps": steps}
+    spawn_boss(room, seat, steps)
     if use:
         steps.append({"t": "ability", "seat": seat["id"], "ab": kind})
     if use and kind == "swap":
@@ -312,8 +363,22 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
             steps.append({"t": "spin", "seat": seat["id"], "v": roll})
         ev["roll"] = roll
         before = seat["pos"]
-        ev["via"] = move_by(room, seat, roll, steps)
-        ev["land"] = before + roll if before + roll <= 100 else before
+        boss = boss_of(room)
+        if boss and before == boss["sq"]:           # standing at the boss: the spin is an attack
+            hit = roll >= BOSS_HIT
+            if hit:
+                boss["hp"] -= 1
+            steps.append({"t": "boss", "do": "hit" if hit else "miss", "seat": seat["id"], "sq": boss["sq"],
+                          "hp": boss["hp"], "max": boss["max"]})
+            if boss["hp"] <= 0:
+                steps.append({"t": "boss", "do": "defeat", "seat": seat["id"], "sq": boss["sq"],
+                              "hp": 0, "max": boss["max"]})
+                gain_charge(room, seat, steps, "boss")
+            ev["via"] = "boss"
+            ev["land"] = before
+        else:
+            ev["via"] = move_by(room, seat, roll, steps)
+            ev["land"] = before + roll if before + roll <= 100 else before
     ev["to"] = seat["pos"]
     seat["spins"] += 1
     seat["steady"] = False

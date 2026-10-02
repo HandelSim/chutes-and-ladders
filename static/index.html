@@ -562,10 +562,33 @@ details.help p{margin:6px 0 0}
       fill: "var(--muted)", "letter-spacing": 2 }, board);
     st.textContent = "START";
     featLayer = el("g", { id: "features" }, board);
+    bossLayer = el("g", { id: "bossLayer" }, board);
+  }
+  // The boss waiting on one square: {sq, hp, max}, or null once beaten / when there is none.
+  let bossLayer, bossState = null;
+  function drawBoss(b) {
+    bossState = b && b.hp > 0 ? { sq: +b.sq, hp: +b.hp, max: +b.max || 3 } : null;
+    renderBoss();
+  }
+  function renderBoss(shake) {
+    bossLayer.replaceChildren();
+    if (!bossState) return;
+    const c = center(bossState.sq);
+    const g = el("g", { class: "bossTok" }, bossLayer);
+    el("circle", { cx: c.x, cy: c.y, r: 38, fill: "#7a1d1d", stroke: "#ffd25e", "stroke-width": 5, opacity: .93 }, g);
+    const face = el("text", { x: c.x, y: c.y + 14, "text-anchor": "middle", "font-size": 40 }, g);
+    face.textContent = "👹";
+    for (let i = 0; i < bossState.max; i++)
+      el("rect", { x: c.x - bossState.max * 11 + i * 22 + 1, y: c.y - 58, width: 20, height: 9, rx: 3,
+        fill: i < bossState.hp ? "#e5484d" : "#3a3a3a", stroke: "#000", "stroke-width": 1.5 }, g);
+    const t = el("title", {}, g);
+    t.textContent = `Boss on square ${bossState.sq}: ${bossState.hp} of ${bossState.max} hit points left. Defeat it to move past.`;
+    if (shake && !REDUCED) g.animate([{ transform: "translateX(-8px)" }, { transform: "translateX(8px)" }, { transform: "translateX(0)" }], { duration: 300 });
   }
   // Chutes and ladders for one board {ladders:[[a,z]..], chutes:[[a,z]..]}.
   function drawFeatures(b) {
     if (!b || !Array.isArray(b.ladders) || !Array.isArray(b.chutes)) b = RL.CLASSIC;
+    drawBoss(b.boss);
     const key = JSON.stringify([b.ladders, b.chutes]);
     if (key === boardKey) return;
     boardKey = key;
@@ -685,7 +708,8 @@ details.help p{margin:6px 0 0}
     if (seat.charges < ab.cost) return (seat.charges <= 0 ? "No ability charges left." : `This ability needs ${ab.cost} charges.`) +
       " Slide down a chute or win a minigame to earn one.";
     if (ab.kind === "shield" && seat.shield) return "Your shield is already up.";
-    if (ab.kind === "swap" && !s.seats.some(o => o !== seat && o.pos > seat.pos && (!SWAP_RANGE || o.pos - seat.pos <= SWAP_RANGE)))
+    const bs = s.board && s.board.boss && s.board.boss.hp > 0 ? s.board.boss.sq : 0;
+    if (ab.kind === "swap" && !s.seats.some(o => o !== seat && o.pos > seat.pos && (!SWAP_RANGE || o.pos - seat.pos <= SWAP_RANGE) && !(bs && seat.pos <= bs && bs < o.pos)))
       return "Nobody is ahead of you to swap with.";
     if (ab.kind === "quake" && !s.seats.some(o => o !== seat && o.pos > 0 && !o.steady && (!QUAKE_AHEAD || o.pos > seat.pos)))
       return QUAKE_AHEAD ? "Nobody ahead of you to knock back." : "Nobody else is on the board yet.";
@@ -879,9 +903,26 @@ details.help p{margin:6px 0 0}
         await Promise.all(pieces.filter(q => q.pos > 0).map(q => shake(q)));
         await sleep(500 * Math.max(SPEED, .6));
         b.hidden = true;
+      } else if (st.t === "boss") {
+        if (st.do === "spawn") {
+          bossState = { sq: st.sq, hp: st.hp, max: st.max };
+          renderBoss();
+          setWho(p, `👹 A boss appears on square ${st.sq}! Nobody can pass until it is defeated.`);
+          await sleep(900 * Math.max(SPEED, .6));
+        } else if (st.do === "block") {
+          setWho(p, `👹 The boss blocks the way on ${st.sq}!`);
+          await sleep(400 * SPEED);
+        } else {
+          if (bossState) bossState.hp = st.hp;
+          const hit = st.do !== "miss";
+          setWho(p, st.do === "defeat" ? "👹 The boss is defeated! The way is open." : hit ? `⚔️ Hit! The boss has ${st.hp} left.` : "⚔️ Missed the boss (needs a 3 or more).");
+          if (st.do === "defeat") bossState = null;
+          renderBoss(true);
+          await sleep(600 * SPEED);
+        }
       } else if (st.t === "charge") {
         p.charges = st.n;
-        setWho(p, `+1 charge (${st.why === "chute" ? "slid down a chute" : "won the minigame"}).`);
+        setWho(p, `+1 charge (${st.why === "chute" ? "slid down a chute" : st.why === "boss" ? "beat the boss" : "won the minigame"}).`);
         renderRoster(st.seat);
         await ringFx(p, "var(--accent)", 24);
       }
@@ -959,7 +1000,11 @@ details.help p{margin:6px 0 0}
       : ev.ab === "boost" && sv.length > 1 ? `spun ${sv.join(" + ")} = ${ev.roll}` : `spun ${ev.roll}`;
     let t, cls = "";
     if (ev.via === "bounce") t = `${rolled}, needs ${100 - ev.from}, stays on ${ev.from}`;
-    else {
+    else if (ev.via === "boss") {
+      const bs = stepsOf(ev).filter(s => s.t === "boss").pop();
+      t = `${rolled}: ⚔️ ` + (bs && bs.do === "defeat" ? "<b>defeated the boss!</b>" : bs && bs.do === "hit" ? `hit the boss (${bs.hp} left)` : "missed the boss");
+      cls = "up";
+    } else {
       t = `${rolled}: ${ev.from || "start"} → ${ev.land}`;
       if (ev.via === "ladder") { t += ` <b>↑ ladder to ${ev.to}</b>`; cls = "up"; }
       else if (ev.via === "chute") { t += ` <b>↓ chute to ${ev.to}</b>`; cls = "down"; }
