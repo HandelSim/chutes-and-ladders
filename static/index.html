@@ -870,6 +870,15 @@ details.help p{margin:6px 0 0}
         const q = pieceOf(st.b);
         setWho(p, q ? `Swaps places with ${q.name}!` : "Swap!");
         await Promise.all([arcTo(p, st.apos, 90), q ? arcTo(q, st.bpos, -60) : null]);
+      } else if (st.t === "disaster") {
+        const b = $("abBanner");
+        b.replaceChildren(h("span", { class: "ic", text: st.icon }), h("span", { text: `Natural disaster: ${st.label}!` }));
+        b.hidden = false;
+        b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+        setWho(null, `${st.icon} ${st.label} strikes the board!`);
+        await Promise.all(pieces.filter(q => q.pos > 0).map(q => shake(q)));
+        await sleep(500 * Math.max(SPEED, .6));
+        b.hidden = true;
       } else if (st.t === "charge") {
         p.charges = st.n;
         setWho(p, `+1 charge (${st.why === "chute" ? "slid down a chute" : "won the minigame"}).`);
@@ -956,6 +965,8 @@ details.help p{margin:6px 0 0}
       else if (ev.via === "chute") { t += ` <b>↓ chute to ${ev.to}</b>`; cls = "down"; }
       else if (ev.via === "shield") t += ` <b>🛡️ shield blocks the chute</b>`;
     }
+    const dz = stepsOf(ev).find(s => s.t === "disaster");
+    if (dz) t += ` · <b>${esc(dz.icon)} ${esc(dz.label)}!</b>`;
     addLog(label, p, pre + t + auto + (ev.mini ? " · <b>Minigame time!</b>" : ""), cls);
   }
   const ordinal = n => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");

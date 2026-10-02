@@ -327,7 +327,43 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
         every = room.get("miniEvery", 0)
         if every and len(room["seats"]) >= 2 and room["round"] % every == 0:
             ev["mini"] = True                       # caller starts the minigame
+        if maybe_disaster(room, seat, steps):
+            ev["to"] = seat["pos"]
     return ev
+
+
+# ---------- natural disasters ----------
+# At the end of a round there is a DISASTER_CHANCE that one strikes. Each hits players on
+# a range of squares and pushes them back (no chute or ladder is taken where they land).
+# `one` means only a single random player in range is hit. Off in overtime.
+DISASTER_CHANCE = 0.1
+DISASTERS = [
+    # key, label, icon, lowest square hit, highest square hit, squares back, one player only
+    ("quake", "Earthquake", "🌋", 2, 100, 3, False),
+    ("flood", "Flood", "🌊", 2, 35, 6, False),
+    ("avalanche", "Avalanche", "🏔️", 66, 100, 8, False),
+    ("tornado", "Tornado", "🌪️", 2, 100, 6, True),
+]
+
+
+def maybe_disaster(room, seat, steps):
+    """Maybe strike with a random disaster. Returns True if anyone was moved."""
+    if room.get("disasters", True) is False or overtime(room) or RNG.random() >= DISASTER_CHANCE:
+        return False
+    options = []
+    for key, label, icon, lo, hi, back, one in DISASTERS:
+        victims = [s for s in room["seats"] if lo <= s["pos"] <= hi and s["pos"] < 100]
+        if victims:
+            options.append((key, label, icon, back, one, victims))
+    if not options:
+        return False
+    key, label, icon, back, one, victims = RNG.choice(options)
+    if one:
+        victims = [RNG.choice(victims)]
+    steps.append({"t": "disaster", "seat": seat["id"], "kind": key, "label": label, "icon": icon})
+    for s in victims:
+        move_by(room, s, -back, steps, resolve=False)
+    return True
 
 
 def pick_minigame(room):
