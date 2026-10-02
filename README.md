@@ -61,6 +61,9 @@ The server is authoritative: it rolls every spin, owns turn order and applies ab
 
 Every response carries a `build` id (hash of the code). When it changes, open pages show an "Update
 available" button at the top right instead of reloading in the middle of a game.
+Accepted suggestions deploy themselves: static-only changes go out at once (open pages keep what they loaded
+until the player taps the button), and anything that needs a server restart waits until no game is in progress.
+The page is dark only.
 
 ## Run
 

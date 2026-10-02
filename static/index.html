@@ -2,6 +2,7 @@
 <html lang="en" data-oak-no-toc>
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chutes and Ladders</title>
 <meta name="description" content="An automated game of Chutes and Ladders. Pick the number of players and watch it play, or step through turn by turn.">
@@ -10,26 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f5efe3; --panel:#fffdf8; --ink:#2b2622; --muted:#6f655b; --line:#e4d9c6;
-  --accent:#2f7d6d; --accent-ink:#ffffff; --accent-soft:#dcefe9;
-  --c1:#fbe6ae; --c2:#d4ebcf; --c3:#cde1f2; --c4:#f5d0cb; --c5:#e3d8f2;
-  --grid:#bfae92; --num:#5b4f43; --finish:#ffd25e;
-  --rail:#9b6430; --rung:#c4884c;
-  --start:#efe5d2; --shadow:0 1px 2px rgba(60,40,20,.08),0 6px 18px rgba(60,40,20,.08);
-  --token-stroke:#ffffff;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#1a1917; --panel:#24221f; --ink:#efe7db; --muted:#a99f92; --line:#3a362f;
-    --accent:#4fb39d; --accent-ink:#0f1a17; --accent-soft:#1f3a33;
-    --c1:#4d4124; --c2:#2e4630; --c3:#273c4e; --c4:#4e302c; --c5:#3b3350;
-    --grid:#5d5447; --num:#ddd1c0; --finish:#8a6d1c;
-    --rail:#c48a4e; --rung:#e0a868;
-    --start:#2e2b26; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
-    --token-stroke:#1a1917;
-  }
-}
-:root[data-theme="dark"]{
+  /* Dark only (owner request): no light palette, and native controls render dark too. */
+  color-scheme:dark;
   --bg:#1a1917; --panel:#24221f; --ink:#efe7db; --muted:#a99f92; --line:#3a362f;
   --accent:#4fb39d; --accent-ink:#0f1a17; --accent-soft:#1f3a33;
   --c1:#4d4124; --c2:#2e4630; --c3:#273c4e; --c4:#4e302c; --c5:#3b3350;
