@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en" data-oak-no-toc>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chutes and Ladders</title>
+<meta name="description" content="An automated game of Chutes and Ladders. Pick the number of players and watch it play, or step through turn by turn.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5efe3; --panel:#fffdf8; --ink:#2b2622; --muted:#6f655b; --line:#e4d9c6;
+  --accent:#2f7d6d; --accent-ink:#ffffff; --accent-soft:#dcefe9;
+  --c1:#fbe6ae; --c2:#d4ebcf; --c3:#cde1f2; --c4:#f5d0cb; --c5:#e3d8f2;
+  --grid:#bfae92; --num:#5b4f43; --finish:#ffd25e;
+  --rail:#9b6430; --rung:#c4884c;
+  --start:#efe5d2; --shadow:0 1px 2px rgba(60,40,20,.08),0 6px 18px rgba(60,40,20,.08);
+  --token-stroke:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1a1917; --panel:#24221f; --ink:#efe7db; --muted:#a99f92; --line:#3a362f;
+    --accent:#4fb39d; --accent-ink:#0f1a17; --accent-soft:#1f3a33;
+    --c1:#4d4124; --c2:#2e4630; --c3:#273c4e; --c4:#4e302c; --c5:#3b3350;
+    --grid:#5d5447; --num:#ddd1c0; --finish:#8a6d1c;
+    --rail:#c48a4e; --rung:#e0a868;
+    --start:#2e2b26; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+    --token-stroke:#1a1917;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1a1917; --panel:#24221f; --ink:#efe7db; --muted:#a99f92; --line:#3a362f;
+  --accent:#4fb39d; --accent-ink:#0f1a17; --accent-soft:#1f3a33;
+  --c1:#4d4124; --c2:#2e4630; --c3:#273c4e; --c4:#4e302c; --c5:#3b3350;
+  --grid:#5d5447; --num:#ddd1c0; --finish:#8a6d1c;
+  --rail:#c48a4e; --rung:#e0a868;
+  --start:#2e2b26; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  --token-stroke:#1a1917;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-family:Fredoka,system-ui,sans-serif;font-weight:700;font-size:30px;margin:0;letter-spacing:.2px}
+header p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.board-wrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:var(--shadow)}
+#board{display:block;width:100%;height:auto;user-select:none}
+.panel{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.card h2{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:15px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.row{display:flex;gap:8px;align-items:center}
+.row + .row{margin-top:10px}
+button{
+  font:inherit;font-weight:600;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);padding:9px 14px;min-height:40px;
+  transition:transform .08s ease,background .15s ease,opacity .15s ease;
+}
+button:hover:not(:disabled){filter:brightness(.97)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grow{flex:1}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stepper button{border:0;border-radius:0;min-width:40px;padding:9px 0}
+.stepper input{width:44px;text-align:center;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:700;font-size:17px;-moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+label.lbl{font-weight:600}
+.interval{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.interval .top{display:flex;justify-content:space-between}
+.interval output{font-variant-numeric:tabular-nums;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.hint{color:var(--muted);font-size:13px;margin:10px 0 0}
+kbd{font:600 12px/1 ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:2px 5px;background:var(--bg)}
+.spin-card{display:flex;gap:14px;align-items:center}
+#spinner{width:120px;height:120px;flex:none}
+.turn-info{min-width:0}
+.turn-info .who{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:19px;display:flex;align-items:center;gap:8px}
+.turn-info .what{color:var(--muted);margin-top:4px;min-height:42px}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 0 2px var(--panel),0 0 0 3px rgba(0,0,0,.15)}
+#roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+#roster li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:7px 9px;border-radius:9px;border:1px solid transparent}
+#roster li.current{background:var(--accent-soft);border-color:var(--accent)}
+#roster .name{font-weight:600}
+#roster .sq{font-variant-numeric:tabular-nums;font-weight:700}
+#roster .meta{grid-column:2 / 4;color:var(--muted);font-size:12.5px;margin-top:-4px}
+.bar{height:4px;border-radius:2px;background:var(--line);grid-column:1 / 4;overflow:hidden}
+.bar i{display:block;height:100%;width:0;transition:width .3s ease}
+#log{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;font-size:13.5px;display:flex;flex-direction:column;gap:2px}
+#log li{display:flex;gap:8px;align-items:baseline;padding:3px 2px;border-bottom:1px dashed var(--line)}
+#log li .t{color:var(--muted);font-variant-numeric:tabular-nums;min-width:34px}
+#log li .dot{width:9px;height:9px;transform:translateY(1px);box-shadow:none}
+#log li.up b{color:#2a9d55}
+#log li.down b{color:#d1495b}
+#log:empty::before{content:"No turns yet.";color:var(--muted)}
+.banner{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(20,15,10,.35);border-radius:16px;backdrop-filter:blur(1px);overflow:hidden;
+}
+.banner[hidden]{display:none}
+.banner .box{
+  background:var(--panel);border-radius:16px;padding:22px 26px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3);
+  animation:pop .35s cubic-bezier(.2,1.4,.4,1);max-width:86%;
+}
+.banner .box h3{font-family:Fredoka,system-ui,sans-serif;font-size:28px;margin:0 0 4px;display:flex;align-items:center;justify-content:center;gap:10px}
+.banner .box p{margin:0 0 14px;color:var(--muted)}
+.confetti{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.token .ring{transform-box:fill-box;transform-origin:center;animation:pulse 1.2s ease-in-out infinite;opacity:0}
+.token.current .ring{opacity:1}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.35);opacity:.15}}
+#hub-num{transition:transform .2s cubic-bezier(.2,1.6,.4,1)}
+#hub-num.bump{transform:scale(1.35)}
+.av{width:30px;height:30px;border-radius:50%;flex:none;object-fit:cover;object-position:top;background:#fff;box-shadow:0 0 0 3px var(--ring,#ccc)}
+.turn-info .who .av{width:34px;height:34px}
+#picks{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+#picks button{display:flex;align-items:center;gap:9px;width:100%;padding:6px 8px;min-height:46px;text-align:left;font-weight:600;font-size:13.5px}
+#picks button span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker{position:fixed;inset:0;z-index:20;background:rgba(15,10,5,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.picker[hidden]{display:none}
+.picker .sheet{background:var(--panel);border-radius:16px;width:min(720px,100%);max-height:min(86vh,760px);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:pop .2s ease-out}
+.picker .head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.picker .head h3{font-family:Fredoka,system-ui,sans-serif;margin:0;font-size:20px;flex:1}
+.picker .body{overflow:auto;padding:6px 16px 16px}
+.picker h4{margin:14px 0 8px;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
+.picker .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
+.picker .grid button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;font-size:12.5px;font-weight:600;position:relative;line-height:1.15}
+.picker .grid button img{width:58px;height:58px;border-radius:50%;object-fit:cover;object-position:top;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.picker .grid button.sel{border-color:var(--accent);background:var(--accent-soft)}
+.picker .grid button .tag{position:absolute;top:4px;right:4px;font-size:10.5px;color:#fff;border-radius:8px;padding:1px 6px}
+footer{color:var(--muted);font-size:13px;margin-top:16px}
+@media (prefers-reduced-motion:reduce){.token .ring{animation:none}.banner .box{animation:none}}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:var(--shadow)}
+.tabs button{border:0;background:transparent;min-height:38px}
+.tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.card p.lead{margin:0 0 12px;color:var(--muted)}
+.code{font-family:Fredoka,system-ui,sans-serif;font-weight:700;font-size:30px;letter-spacing:4px;line-height:1.1}
+.muted{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+input.text{font:inherit;font-weight:600;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:40px;width:100%;min-width:0}
+.err{color:#d1495b;font-size:13.5px;margin:10px 0 0;min-height:0}
+.err:empty{display:none}
+#seats{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+#seats li{display:flex;align-items:center;gap:6px}
+#seats .seat{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:6px 10px;min-height:46px;text-align:left}
+#seats .seat span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#seats .seat[disabled]{opacity:1;cursor:default}
+#seats li.turn .seat{border-color:var(--accent);background:var(--accent-soft)}
+.you{font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:8px;padding:1px 7px;margin-left:auto;flex:none}
+#seats .x{min-width:40px;padding:0}
+button.big{font-size:20px;min-height:54px;font-family:Fredoka,system-ui,sans-serif}
+button.go{animation:glow 1.1s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(47,125,109,.55)}50%{box-shadow:0 0 0 8px rgba(47,125,109,0)}}
+.host{border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
+#roster .mine-tag{font-size:11px;color:var(--muted);font-weight:600;margin-left:6px}
+@media (prefers-reduced-motion:reduce){button.go{animation:none}}
+input.code-in{font-weight:700;letter-spacing:3px;text-transform:uppercase}
+input.name{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);min-height:40px;min-width:0}
+input.name:focus,input.text:focus{outline:2px solid var(--accent);outline-offset:1px}
+#picks li{display:flex;gap:6px;align-items:center}
+#picks li button{width:auto;flex:0 0 46%;max-width:160px}
+#picks li input.name{flex:1;width:100%}
+#seats .seat.pick{flex:none;width:auto;padding:6px 8px}
+#seats li input.name{flex:1;width:100%}
+#seats div.seat{border:1px solid var(--line);border-radius:10px}
+#seats .who2{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+#seats .who2 b,#seats .who2 small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#seats .who2 small{color:var(--muted);font-size:12px}
+#seats .you{margin-left:0}
+#picks{grid-template-columns:1fr}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Chutes &amp; Ladders</h1>
+    <p>Play on one screen, or make a room and everyone spins from their own device.</p>
+  </header>
+
+  <div class="layout">
+    <section class="board-wrap" aria-label="Game board">
+      <svg id="board" viewBox="0 0 1000 1090" role="img" aria-label="Chutes and Ladders board, squares 1 to 100"></svg>
+      <div class="banner" id="banner" hidden>
+        <div class="box" role="dialog" aria-live="polite">
+          <h3 id="winTitle"></h3>
+          <p id="winSub"></p>
+          <div class="row" style="justify-content:center">
+            <button id="closeBanner">Close</button>
+            <button class="primary" id="againBtn">Play again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tabLocal" class="on" aria-selected="true">On this screen</button>
+        <button role="tab" id="tabOnline" aria-selected="false">Online room</button>
+      </div>
+
+      <div id="localPanel" class="panel">
+        <div class="card">
+          <h2>Setup</h2>
+          <div class="row">
+            <label class="lbl grow" for="players">Players</label>
+            <div class="stepper">
+              <button id="minus" aria-label="Fewer players">−</button>
+              <input id="players" type="number" min="1" max="6" value="3" inputmode="numeric">
+              <button id="plus" aria-label="More players">+</button>
+            </div>
+          </div>
+          <ul id="picks" aria-label="Player pieces"></ul>
+          <div class="row">
+            <button id="shuffleBtn" title="Random characters for everyone">🎲 Shuffle</button>
+            <button class="primary grow" id="startBtn">Start game</button>
+          </div>
+          <p class="hint">Tap a piece to change the character. Type to rename a player.</p>
+        </div>
+
+        <div class="card">
+          <h2>Autoplay</h2>
+          <div class="row">
+            <button class="grow" id="playBtn" disabled>▶ Play</button>
+            <button class="grow" id="stepBtn" disabled>Step ⏭</button>
+          </div>
+          <div class="interval">
+            <div class="top"><label class="lbl" for="interval">Time between turns</label><output id="intervalOut" for="interval">1.0 s</output></div>
+            <input id="interval" type="range" min="0" max="5" step="0.1" value="1">
+          </div>
+          <p class="hint"><kbd>Space</kbd> play / pause &nbsp; <kbd>→</kbd> step</p>
+        </div>
+      </div>
+
+      <div id="onlinePanel" class="panel" hidden>
+        <div class="card" id="lobbyCard">
+          <h2>Play together</h2>
+          <p class="lead">Make a room and send the link. Everyone picks a character and spins on their own turn, from their own phone or computer.</p>
+          <div class="row"><input class="text name" id="lobbyName" maxlength="20" autocomplete="off" placeholder="Your name" aria-label="Your name"></div>
+          <div class="row"><button class="primary grow" id="createRoom">Create a room</button></div>
+          <div class="row">
+            <input class="text code-in" id="joinCode" placeholder="Room code" maxlength="5" autocomplete="off" aria-label="Room code">
+            <button id="joinRoom">Join</button>
+          </div>
+          <p class="err" id="lobbyErr"></p>
+        </div>
+
+        <div class="card" id="roomCard" hidden>
+          <div class="row">
+            <div class="grow"><div class="muted">Room</div><div class="code" id="roomCode"></div></div>
+            <button id="copyLink">Copy link</button>
+          </div>
+          <p class="hint" id="roomStatus"></p>
+          <ul id="seats" aria-label="Players in this room"></ul>
+          <div class="row" id="joinSeatRow"><input class="text name grow" id="seatName" maxlength="20" autocomplete="off" placeholder="Your name" aria-label="Your name"><button class="primary" id="joinSeat">Join</button></div>
+          <div class="row" id="spinRow" hidden><button class="primary grow big" id="spinBtn">Spin!</button></div>
+          <div class="host" id="hostBox" hidden>
+            <h2>Host controls</h2>
+            <div class="row">
+              <button class="primary grow" id="hostStart">Start game</button>
+              <button class="grow" id="hostSpin" hidden>Spin for them</button>
+            </div>
+            <div class="interval">
+              <div class="top"><label class="lbl" for="autoSpin">Auto-spin if a player waits</label><output id="autoSpinOut" for="autoSpin">off</output></div>
+              <input id="autoSpin" type="range" min="0" max="60" step="1" value="0">
+            </div>
+          </div>
+          <div class="row"><button id="leaveRoom">Leave room</button></div>
+          <p class="err" id="roomErr"></p>
+        </div>
+      </div>
+
+      <div class="card spin-card">
+        <svg id="spinner" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
+        <div class="turn-info" aria-live="polite">
+          <div class="who" id="who">Ready</div>
+          <div class="what" id="what"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Players</h2>
+        <ol id="roster"></ol>
+      </div>
+
+      <div class="card">
+        <h2>Turn log</h2>
+        <ol id="log"></ol>
+      </div>
+    </aside>
+  </div>
+  <div class="picker" id="picker" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <div class="head"><h3 id="pickerTitle">Pick a character</h3><button id="pickerClose" aria-label="Close">✕</button></div>
+      <div class="body" id="pickerBody"></div>
+    </div>
+  </div>
+  <footer>Classic Milton Bradley layout: 9 ladders, 10 chutes. Spin 1 to 6. You must land on 100 exactly; overshoot and you stay put.</footer>
+</div>
+
+<script src="chars.js"></script>
+<script>
+(() => {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  // Classic Milton Bradley board.
+  const LADDERS = {1:38, 4:14, 9:31, 21:42, 28:84, 36:44, 51:67, 71:91, 80:100};
+  const CHUTES  = {16:6, 47:26, 49:11, 56:53, 62:19, 64:60, 87:24, 93:73, 95:75, 98:78};
+  const PLAYER_COLORS = ["#e63946","#1d7cf2","#2a9d55","#f29e02","#8e44ad","#00a6a6"];
+  const CHUTE_COLORS  = ["#e4572e","#d64f9a","#29a3a3","#f2a900","#5b8def","#6dbb4f","#c2410c","#9b5de5","#0f9d8a","#e76f51"];
+  const SPIN_COLORS   = ["#e63946","#f29e02","#2a9d55","#1d7cf2","#8e44ad","#00a6a6"];
+  const SPEED = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0.35 : 1;
+
+  const $ = id => document.getElementById(id);
+  const board = $("board"), spinner = $("spinner");
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const tween = (dur, fn) => new Promise(res => {
+    dur = Math.max(1, dur * SPEED);
+    const t0 = performance.now();
+    const f = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      fn(t);
+      t < 1 ? requestAnimationFrame(f) : res();
+    };
+    requestAnimationFrame(f);
+  });
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const easeInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+  };
+
+  // ---------- Board geometry ----------
+  function cellXY(n) {
+    const i = n - 1, row = Math.floor(i / 10), c = i % 10;
+    const col = row % 2 === 0 ? c : 9 - c;
+    return { x: col * 100, y: (9 - row) * 100 };
+  }
+  const center = n => { const p = cellXY(n); return { x: p.x + 50, y: p.y + 50 }; };
+  const startSpot = i => ({ x: 210 + i * 68, y: 1046 });
+
+  // ---------- Draw board ----------
+  const chutePaths = {};
+  function drawBoard() {
+    const defs = el("defs", {}, board);
+    const fg = el("linearGradient", { id: "finishGrad", x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+    el("stop", { offset: "0", "stop-color": "#ffe08a" }, fg);
+    el("stop", { offset: "1", "stop-color": "#f4b400" }, fg);
+    const cp = el("clipPath", { id: "tokClip", clipPathUnits: "objectBoundingBox" }, defs);
+    el("circle", { cx: .5, cy: .5, r: .5 }, cp);
+    const sh = el("filter", { id: "tokShadow", x: "-50%", y: "-50%", width: "200%", height: "200%" }, defs);
+    el("feDropShadow", { dx: 0, dy: 3, stdDeviation: 2.5, "flood-color": "#000", "flood-opacity": .35 }, sh);
+
+    const cells = el("g", {}, board);
+    const palette = ["--c1","--c2","--c3","--c4","--c5"];
+    for (let n = 1; n <= 100; n++) {
+      const { x, y } = cellXY(n);
+      const row = Math.floor((n - 1) / 10);
+      const fill = n === 100 ? "url(#finishGrad)" : `var(${palette[(n + row * 2) % 5]})`;
+      el("rect", { x, y, width: 100, height: 100, fill }, cells);
+      const t = el("text", {
+        x: x + 9, y: y + 26, "font-size": 22, "font-weight": 700,
+        "font-family": "Fredoka, system-ui, sans-serif", fill: n === 100 ? "#5a3d00" : "var(--num)", opacity: n === 100 ? 1 : .85
+      }, cells);
+      t.textContent = n;
+    }
+    const fin = el("text", { x: center(100).x, y: center(100).y + 22, "text-anchor": "middle", "font-size": 19,
+      "font-weight": 700, "font-family": "Fredoka, system-ui, sans-serif", fill: "#5a3d00", "letter-spacing": 1 }, cells);
+    fin.textContent = "FINISH";
+    // grid lines
+    const grid = el("g", { stroke: "var(--grid)", "stroke-width": 2, opacity: .7 }, board);
+    for (let i = 0; i <= 10; i++) {
+      el("line", { x1: i * 100, y1: 0, x2: i * 100, y2: 1000 }, grid);
+      el("line", { x1: 0, y1: i * 100, x2: 1000, y2: i * 100 }, grid);
+    }
+    // start pad
+    el("rect", { x: 0, y: 1010, width: 1000, height: 72, rx: 14, fill: "var(--start)", stroke: "var(--grid)", "stroke-width": 2 }, board);
+    const st = el("text", { x: 24, y: 1055, "font-size": 26, "font-weight": 700, "font-family": "Fredoka, system-ui, sans-serif",
+      fill: "var(--muted)", "letter-spacing": 2 }, board);
+    st.textContent = "START";
+
+    // chutes
+    const chuteLayer = el("g", { "stroke-linecap": "round", fill: "none" }, board);
+    Object.entries(CHUTES).forEach(([from, to], idx) => {
+      const a = center(+from), b = center(+to);
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+      const nx = -dy / len, ny = dx / len;
+      const amp = Math.min(130, len * 0.22) * (idx % 2 ? 1 : -1);
+      const c1 = { x: a.x + dx * .3 + nx * amp, y: a.y + dy * .3 + ny * amp };
+      const c2 = { x: a.x + dx * .7 - nx * amp, y: a.y + dy * .7 - ny * amp };
+      const d = `M${a.x},${a.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${b.x},${b.y}`;
+      const color = CHUTE_COLORS[idx % CHUTE_COLORS.length];
+      el("path", { d, stroke: "rgba(0,0,0,.28)", "stroke-width": 34 }, chuteLayer);
+      el("path", { d, stroke: color, "stroke-width": 28, opacity: .92 }, chuteLayer);
+      el("path", { d, stroke: "rgba(255,255,255,.45)", "stroke-width": 9, "stroke-dasharray": "2 16" }, chuteLayer);
+      chutePaths[from] = el("path", { d, stroke: "none" }, chuteLayer);
+      el("circle", { cx: a.x, cy: a.y, r: 19, fill: color, stroke: "rgba(0,0,0,.3)", "stroke-width": 3 }, chuteLayer);
+      el("circle", { cx: a.x, cy: a.y, r: 8, fill: "rgba(0,0,0,.35)" }, chuteLayer);
+    });
+
+    // ladders
+    const ladderLayer = el("g", { "stroke-linecap": "round" }, board);
+    for (const [from, to] of Object.entries(LADDERS)) {
+      const a = center(+from), b = center(+to);
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+      const nx = -dy / len * 15, ny = dx / len * 15;
+      const g = el("g", {}, ladderLayer);
+      const rungs = Math.max(2, Math.floor(len / 42));
+      for (let i = 1; i < rungs; i++) {
+        const t = i / rungs, px = a.x + dx * t, py = a.y + dy * t;
+        el("line", { x1: px + nx, y1: py + ny, x2: px - nx, y2: py - ny, stroke: "var(--rung)", "stroke-width": 7 }, g);
+      }
+      for (const s of [1, -1]) {
+        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: b.x + nx * s, y2: b.y + ny * s,
+          stroke: "rgba(0,0,0,.25)", "stroke-width": 10 }, g);
+        el("line", { x1: a.x + nx * s, y1: a.y + ny * s, x2: b.x + nx * s, y2: b.y + ny * s,
+          stroke: "var(--rail)", "stroke-width": 7 }, g);
+      }
+    }
+  }
+
+  // ---------- Spinner ----------
+  let spinAngle = 0, arrow, hubNum, wedges = [];
+  function drawSpinner() {
+    const pt = (deg, r) => { const a = deg * Math.PI / 180; return [r * Math.sin(a), -r * Math.cos(a)]; };
+    el("circle", { r: 104, fill: "var(--line)" }, spinner);
+    for (let v = 1; v <= 6; v++) {
+      const a0 = (v - 1) * 60, a1 = v * 60;
+      const [x0, y0] = pt(a0, 98), [x1, y1] = pt(a1, 98);
+      const w = el("path", { d: `M0,0 L${x0},${y0} A98,98 0 0 1 ${x1},${y1} Z`, fill: SPIN_COLORS[v - 1], opacity: .85,
+        stroke: "var(--panel)", "stroke-width": 3 }, spinner);
+      wedges.push(w);
+      const [tx, ty] = pt(a0 + 30, 70);
+      const t = el("text", { x: tx, y: ty + 9, "text-anchor": "middle", "font-size": 26, "font-weight": 700,
+        "font-family": "Fredoka, system-ui, sans-serif", fill: "#fff" }, spinner);
+      t.textContent = v;
+    }
+    arrow = el("g", {}, spinner);
+    el("path", { d: "M0,-84 L11,-6 L0,4 L-11,-6 Z", fill: "#1f1b17", stroke: "#fff", "stroke-width": 3, "stroke-linejoin": "round" }, arrow);
+    el("circle", { r: 26, fill: "var(--panel)", stroke: "#1f1b17", "stroke-width": 4 }, spinner);
+    hubNum = el("text", { id: "hub-num", y: 10, "text-anchor": "middle", "font-size": 30, "font-weight": 700,
+      "font-family": "Fredoka, system-ui, sans-serif", fill: "var(--ink)", style: "transform-box:fill-box;transform-origin:center" }, spinner);
+    hubNum.textContent = "?";
+  }
+  async function spin(v) {
+    wedges.forEach(w => w.setAttribute("opacity", .85));
+    hubNum.textContent = "";
+    const from = spinAngle;
+    const target = from - (from % 360) + 360 * 3 + (v - 1) * 60 + 30 + (Math.random() * 36 - 18);
+    await tween(850, t => {
+      spinAngle = from + (target - from) * easeOut(t);
+      arrow.setAttribute("transform", `rotate(${spinAngle})`);
+    });
+    spinAngle = target;
+    wedges.forEach((w, i) => w.setAttribute("opacity", i === v - 1 ? 1 : .35));
+    hubNum.textContent = v;
+    hubNum.classList.add("bump");
+    setTimeout(() => hubNum.classList.remove("bump"), 200);
+  }
+
+  // ---------- Characters ----------
+  const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
+  const charOf = id => CHAR[id] || CHARACTERS[0];
+  const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const avatar = (img, color, size) =>
+    `<img class="av" alt="" src="${img}" style="--ring:${color}${size ? `;width:${size}px;height:${size}px` : ""}">`;
+
+  // ---------- Pieces on the board (shared by both modes) ----------
+  let pieces = [], currentIdx = -1, winnerIdx = -1;
+  function buildPieces(list) {
+    const old = $("tokens"); if (old) old.remove();
+    const layer = el("g", { id: "tokens" }, board);
+    pieces = list.map((s, i) => {
+      const ch = charOf(s.char), g = el("g", { class: "token" }, layer);
+      el("circle", { class: "ring", r: 29, fill: "none", stroke: s.color, "stroke-width": 4 }, g);
+      el("circle", { r: 26, fill: "#fff", filter: "url(#tokShadow)" }, g);
+      const imgEl = el("image", { href: ch.img, x: -23, y: -23, width: 46, height: 46, "clip-path": "url(#tokClip)",
+        preserveAspectRatio: "xMidYMin slice" }, g);
+      el("circle", { r: 24, fill: "none", stroke: s.color, "stroke-width": 5 }, g);
+      el("circle", { cx: 19, cy: -19, r: 10, fill: s.color, stroke: "var(--token-stroke)", "stroke-width": 2.5 }, g);
+      const t = el("text", { x: 19, y: -14.5, "text-anchor": "middle", "font-size": 13, "font-weight": 700,
+        "font-family": "Fredoka, system-ui, sans-serif", fill: "#fff" }, g);
+      t.textContent = i + 1;
+      return { key: s.key, idx: i, char: ch.id, charName: ch.name, custom: s.name || "", name: s.name || ch.name,
+        img: ch.img, imgEl, color: s.color, mine: !!s.mine,
+        pos: s.pos || 0, ladders: s.ladders || 0, chutes: s.chutes || 0, spins: s.spins || 0, x: 0, y: 0, sc: 1, g };
+    });
+    pieces.forEach(p => { Object.assign(p, restSpot(p)); place(p); });
+  }
+  function setPieceChar(p, id) {
+    const ch = charOf(id);
+    if (p.char === ch.id) return;
+    p.char = ch.id; p.charName = ch.name; p.name = p.custom || ch.name;
+    p.img = ch.img; p.imgEl.setAttribute("href", ch.img);
+  }
+  function setPieceName(p, name) { p.custom = name || ""; p.name = p.custom || p.charName; }
+  const cleanName = v => String(v || "").replace(/\s+/g, " ").trim().slice(0, 20);
+  function place(p) { p.g.setAttribute("transform", `translate(${p.x} ${p.y}) scale(${p.sc})`); }
+  function restSpot(p) {
+    if (p.pos === 0) return startSpot(p.idx);
+    const c = center(p.pos);
+    const here = pieces.filter(q => q.pos === p.pos);
+    if (here.length < 2) return c;
+    const k = here.indexOf(p), ang = -Math.PI / 2 + k * 2 * Math.PI / here.length, r = here.length > 3 ? 28 : 24;
+    return { x: c.x + Math.cos(ang) * r, y: c.y + Math.sin(ang) * r };
+  }
+  async function settleAll() {
+    const moves = pieces.map(p => ({ p, x0: p.x, y0: p.y, ...restSpot(p) }));
+    await tween(180, t => {
+      const e = easeOut(t);
+      for (const m of moves) { m.p.x = m.x0 + (m.x - m.x0) * e; m.p.y = m.y0 + (m.y - m.y0) * e; place(m.p); }
+    });
+  }
+  async function hopTo(p, n) {
+    const x0 = p.x, y0 = p.y, { x, y } = center(n);
+    await tween(130, t => {
+      p.x = x0 + (x - x0) * t; p.y = y0 + (y - y0) * t - Math.sin(Math.PI * t) * 26;
+      p.sc = 1 + Math.sin(Math.PI * t) * .18; place(p);
+    });
+    p.sc = 1; place(p);
+  }
+  async function climb(p, from, to) {
+    const a = center(from), b = center(to), len = Math.hypot(b.x - a.x, b.y - a.y);
+    await tween(250 + len * .9, t => {
+      const e = easeInOut(t);
+      p.x = a.x + (b.x - a.x) * e; p.y = a.y + (b.y - a.y) * e; place(p);
+    });
+  }
+  async function slide(p, from) {
+    const path = chutePaths[from], L = path.getTotalLength();
+    await tween(300 + L * .8, t => {
+      const pt = path.getPointAtLength(L * (t * t));   // accelerate down the chute
+      p.x = pt.x; p.y = pt.y; p.sc = 1 + Math.sin(Math.PI * t) * .1; place(p);
+    });
+    p.sc = 1; place(p);
+  }
+  async function shake(p) {
+    const x0 = p.x;
+    await tween(380, t => { p.x = x0 + Math.sin(t * Math.PI * 6) * 9 * (1 - t); place(p); });
+    p.x = x0; place(p);
+  }
+  function resolveMove(from, roll) {
+    const land = from + roll;
+    if (land > 100) return { land: from, to: from, via: "bounce" };
+    if (LADDERS[land]) return { land, to: LADDERS[land], via: "ladder" };
+    if (CHUTES[land]) return { land, to: CHUTES[land], via: "chute" };
+    return { land, to: land, via: null };
+  }
+  function logText(ev) {
+    const auto = ev.auto ? " <i>(auto)</i>" : "";
+    if (ev.via === "bounce") return [`spun <b>${ev.roll}</b>, needs ${100 - ev.from}, stays on ${ev.from}${auto}`, ""];
+    let t = `spun ${ev.roll}: ${ev.from || "start"} → ${ev.land}${auto}`;
+    if (ev.via === "ladder") return [t + ` <b>↑ ladder to ${ev.to}</b>`, "up"];
+    if (ev.via === "chute") return [t + ` <b>↓ chute to ${ev.to}</b>`, "down"];
+    return [t, ""];
+  }
+  // Animate one resolved move: spinner, hops, then ladder/chute. Same for both modes.
+  async function animateMove(p, ev) {
+    $("tokens").appendChild(p.g);               // moving piece draws on top
+    markCurrent(p);
+    setWho(p, "Spinning…");
+    await spin(ev.roll);
+    if (ev.via === "bounce") {
+      setWho(p, `Spun ${ev.roll}. Needs exactly ${100 - ev.from}, stays on ${ev.from}.`);
+      await shake(p);
+    } else {
+      setWho(p, `Spun ${ev.roll}. Moving ${ev.from || "start"} → ${ev.land}.`);
+      for (let s = ev.from + 1; s <= ev.land; s++) await hopTo(p, s);
+      p.pos = ev.land;
+      if (ev.via === "ladder") {
+        setWho(p, `Ladder! ${ev.land} climbs to ${ev.to}.`);
+        await sleep(120 * SPEED);
+        await climb(p, ev.land, ev.to);
+        p.ladders++;
+      } else if (ev.via === "chute") {
+        setWho(p, `Chute! ${ev.land} slides down to ${ev.to}.`);
+        await sleep(120 * SPEED);
+        await slide(p, ev.land);
+        p.chutes++;
+      }
+    }
+    p.pos = ev.to; p.spins++;
+    await settleAll();
+    const [html, cls] = logText(ev);
+    addLog(ev.n, p, html, cls);
+  }
+
+  // ---------- Shared UI ----------
+  function setWho(p, msg) {
+    $("who").innerHTML = p ? `${avatar(p.img, p.color)}<span>${esc(p.name)}</span>` : "Ready";
+    $("what").textContent = msg;
+  }
+  function markCurrent(p) { pieces.forEach(q => q.g.classList.toggle("current", q === p)); }
+  function renderRoster() {
+    const r = $("roster");
+    r.innerHTML = "";
+    pieces.forEach((p, i) => {
+      const li = document.createElement("li");
+      if (i === currentIdx && winnerIdx < 0) li.className = "current";
+      li.innerHTML = `${avatar(p.img, p.color)}<span class="name">${esc(p.name)}${i === winnerIdx ? " 🏆" : ""}` +
+        `${mode === "online" && p.mine ? '<span class="mine-tag">you</span>' : ""}</span>` +
+        `<span class="sq">${p.pos ? "Sq " + p.pos : "Start"}</span>` +
+        `<span class="meta">${p.custom ? esc(p.charName) + " · " : ""}${plural(p.spins, "spin")} · ${plural(p.ladders, "ladder")} · ${plural(p.chutes, "chute")}</span>` +
+        `<span class="bar"><i style="width:${p.pos}%;background:${p.color}"></i></span>`;
+      r.appendChild(li);
+    });
+  }
+  function addLog(n, p, html, cls) {
+    const li = document.createElement("li");
+    if (cls) li.className = cls;
+    li.innerHTML = `<span class="t">T${n}</span><span class="dot" style="background:${p.color}"></span><span>${esc(p.name)} ${html}</span>`;
+    const log = $("log");
+    log.prepend(li);
+    while (log.children.length > 200) log.lastChild.remove();
+  }
+  function clearConfetti() { document.querySelectorAll(".confetti").forEach(c => c.remove()); }
+  function showWinner(p, turns, againLabel) {
+    $("winTitle").innerHTML = `${avatar(p.img, p.color, 56)}<span>${esc(p.name)} wins!</span>`;
+    $("winSub").textContent = `Reached 100 on turn ${turns} (${plural(p.spins, "spin")}, ${plural(p.ladders, "ladder")}, ${plural(p.chutes, "chute")}).`;
+    $("againBtn").hidden = !againLabel;
+    if (againLabel) $("againBtn").textContent = againLabel;
+    if (!$("banner").hidden) return;
+    $("banner").hidden = false;
+    clearConfetti();
+    if (SPEED < 1) return;
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement("i");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "%";
+      c.style.background = [...PLAYER_COLORS, "#ffd25e"][i % 7];
+      c.style.animationDuration = (1.6 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * .5) + "s";
+      $("banner").appendChild(c);
+    }
+  }
+  function hideBanner() { $("banner").hidden = true; clearConfetti(); }
+
+  // ---------- Character picker ----------
+  let pickerDone = null, lastFocus = null;
+  // takenBy: id -> {label, color} for pieces held by someone else.
+  function openPicker(title, selected, takenBy, onPick) {
+    lastFocus = document.activeElement;
+    pickerDone = onPick;
+    $("pickerTitle").textContent = title;
+    const body = $("pickerBody");
+    body.innerHTML = "";
+    for (const group of [...new Set(CHARACTERS.map(c => c.group))]) {
+      const h = document.createElement("h4"); h.textContent = group; body.appendChild(h);
+      const grid = document.createElement("div"); grid.className = "grid"; body.appendChild(grid);
+      for (const c of CHARACTERS.filter(c => c.group === group)) {
+        const b = document.createElement("button"), tk = takenBy[c.id];
+        if (c.id === selected) b.className = "sel";
+        b.innerHTML = `<img alt="" src="${c.img}"><span>${esc(c.name)}</span>` +
+          (tk ? `<span class="tag" style="background:${tk.color}">${esc(tk.label)}</span>` : "");
+        b.onclick = () => { closePicker(); onPick(c.id); };
+        grid.appendChild(b);
+      }
+    }
+    $("picker").hidden = false;
+    (body.querySelector(".sel") || body.querySelector("button")).focus();
+  }
+  function closePicker() { $("picker").hidden = true; pickerDone = null; if (lastFocus) lastFocus.focus(); }
+
+  // ================= LOCAL MODE (one screen) =================
+  const Lc = { turn: 0, current: 0, winner: null, playing: false, busy: false, loopId: 0, turnPromise: null };
+  let picks = [];
+  try { picks = JSON.parse(store.get("cl.picks", "[]")).filter(id => CHAR[id]); } catch { picks = []; }
+  const shuffledIds = () => CHARACTERS.map(c => c.id).sort(() => Math.random() - .5);
+  function fillPicks() {
+    picks = [...new Set(picks)].slice(0, 6);
+    for (const id of shuffledIds()) { if (picks.length >= 6) break; if (!picks.includes(id)) picks.push(id); }
+    store.set("cl.picks", JSON.stringify(picks));
+  }
+  fillPicks();
+  let names = [];
+  try { names = JSON.parse(store.get("cl.names", "[]")).map(cleanName).slice(0, 6); } catch { names = []; }
+  function clampPlayers(v) { v = parseInt(v, 10); return Math.min(6, Math.max(1, isNaN(v) ? 3 : v)); }
+  const nPlayers = () => clampPlayers($("players").value);
+  function renderPicks() {
+    const ul = $("picks");
+    ul.innerHTML = "";
+    for (let i = 0; i < nPlayers(); i++) {
+      const c = charOf(picks[i]), li = document.createElement("li");
+      li.innerHTML = `<button aria-label="Player ${i + 1}: ${esc(c.name)}. Change character">${avatar(c.img, PLAYER_COLORS[i])}<span>${esc(c.name)}</span></button>` +
+        `<input class="name" maxlength="20" autocomplete="off" placeholder="Player ${i + 1} name" aria-label="Player ${i + 1} name">`;
+      const inp = li.querySelector("input");
+      inp.value = names[i] || "";
+      inp.addEventListener("input", () => {
+        names[i] = cleanName(inp.value);
+        store.set("cl.names", JSON.stringify(names));
+        const p = mode === "local" && pieces[i];
+        if (p) { setPieceName(p, names[i]); renderRoster(); if (i === currentIdx && !Lc.busy) setWho(p, $("what").textContent); }
+      });
+      li.firstChild.onclick = () => {
+        if (Lc.playing) localSetPlaying(false);
+        const taken = {};
+        picks.slice(0, nPlayers()).forEach((id, j) => { if (j !== i) taken[id] = { label: "P" + (j + 1), color: PLAYER_COLORS[j] }; });
+        openPicker(`Player ${i + 1}: pick a character`, picks[i], taken, id => {
+          const j = picks.indexOf(id);              // held by someone else: swap with them
+          if (j > -1) picks[j] = picks[i];
+          picks[i] = id;
+          applyPicks();
+        });
+      };
+      ul.appendChild(li);
+    }
+  }
+  function applyPicks() {                         // works mid-game too
+    store.set("cl.picks", JSON.stringify(picks));
+    renderPicks();
+    if (mode !== "local") return;
+    pieces.forEach(p => setPieceChar(p, picks[p.idx]));
+    renderRoster();
+    const cur = Lc.winner || pieces[Lc.current];
+    if (cur && $("who").textContent !== "Ready") setWho(cur, $("what").textContent);
+  }
+  function localNew(n) {
+    Lc.loopId++; Lc.playing = false;
+    Object.assign(Lc, { turn: 0, current: 0, winner: null });
+    buildPieces(Array.from({ length: n }, (_, i) => ({ key: i, color: PLAYER_COLORS[i], char: picks[i], name: names[i] })));
+    currentIdx = 0; winnerIdx = -1;
+    markCurrent(pieces[0]);
+    $("log").innerHTML = "";
+    hideBanner();
+    setWho(pieces[0], "Up first. Press Play or Step.");
+    renderRoster();
+    localButtons();
+  }
+  function localIdle() {
+    localNew(nPlayers());
+    markCurrent(null);
+    $("startBtn").textContent = "Start game";
+    setWho(null, "Pick characters, then press Start (or Step through it yourself).");
+  }
+  async function localTurn() {
+    if (Lc.busy || Lc.winner || mode !== "local") return;
+    Lc.busy = true; localButtons();
+    $("startBtn").textContent = "New game";
+    const p = pieces[Lc.current];
+    Lc.turn++;
+    const roll = 1 + Math.floor(Math.random() * 6);
+    await animateMove(p, { n: Lc.turn, roll, from: p.pos, ...resolveMove(p.pos, roll) });
+    if (mode !== "local") { Lc.busy = false; return; }
+    if (p.pos === 100) {
+      Lc.winner = p; winnerIdx = p.idx; Lc.playing = false; Lc.loopId++;
+      setWho(p, `Wins on turn ${Lc.turn}!`);
+      showWinner(p, Lc.turn, "Play again");
+    } else {
+      Lc.current = (Lc.current + 1) % pieces.length;
+      currentIdx = Lc.current;
+      const nx = pieces[Lc.current];
+      markCurrent(nx);
+      if (!Lc.playing) setWho(nx, `Up next on ${nx.pos || "start"}.`);
+    }
+    renderRoster();
+    Lc.busy = false; localButtons();
+  }
+  function localRun() { Lc.turnPromise = localTurn(); return Lc.turnPromise; }
+  const intervalMs = () => Math.round(parseFloat($("interval").value) * 1000);
+  async function autoLoop(id) {
+    if (Lc.turnPromise) await Lc.turnPromise;   // never overlap a turn already in flight
+    while (Lc.playing && id === Lc.loopId && !Lc.winner && mode === "local") {
+      await localRun();
+      if (!Lc.playing || id !== Lc.loopId || Lc.winner) break;
+      const t0 = performance.now();
+      while (performance.now() - t0 < intervalMs()) {   // re-read so slider changes apply mid-wait
+        if (!Lc.playing || id !== Lc.loopId) return;
+        await sleep(50);
+      }
+    }
+  }
+  function localSetPlaying(on) {
+    if (Lc.winner || mode !== "local") on = false;
+    Lc.playing = on; Lc.loopId++;
+    localButtons();
+    if (on) { $("startBtn").textContent = "New game"; autoLoop(Lc.loopId); }
+    else if (!Lc.winner && !Lc.busy && Lc.turn > 0) setWho(pieces[Lc.current], `Paused. Up next on ${pieces[Lc.current].pos || "start"}.`);
+  }
+  function localButtons() {
+    const live = !Lc.winner;
+    $("playBtn").disabled = !live;
+    $("playBtn").textContent = Lc.playing ? "⏸ Pause" : "▶ Play";
+    $("stepBtn").disabled = !live || Lc.playing || Lc.busy;
+  }
+  async function localStart() {
+    Lc.loopId++; Lc.playing = false;
+    if (Lc.turnPromise) await Lc.turnPromise;   // let an in-flight animation land before resetting
+    localNew(nPlayers());
+    $("startBtn").textContent = "New game";
+    localSetPlaying(true);
+  }
+  function syncInterval() {
+    const v = parseFloat($("interval").value);
+    $("intervalOut").textContent = v === 0 ? "none" : v.toFixed(1) + " s";
+    store.set("cl.interval", v);
+  }
+
+  // ================= ONLINE MODE (rooms) =================
+  let clientId = store.get("cl.client", "");
+  if (!/^[0-9a-f]{32}$/.test(clientId)) {
+    clientId = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join("");
+    store.set("cl.client", clientId);
+  }
+  const On = { code: null, s: null, game: null, lastN: 0, queue: [], animating: false, offset: 0, pollToken: 0, layoutKey: "" };
+  const serverNow = () => (Date.now() + On.offset) / 1000;
+  async function api(method, path, body) {
+    const r = await fetch(path, {
+      method, headers: { "X-Client-Id": clientId, ...(body ? { "Content-Type": "application/json" } : {}) },
+      body: body ? JSON.stringify(body) : undefined, cache: "no-store"
+    });
+    let data = {};
+    try { data = await r.json(); } catch {}
+    if (!r.ok) { const e = new Error(data.error || `Server error (${r.status}).`); e.status = r.status; throw e; }
+    return data;
+  }
+  let errTimer;
+  function showErr(id, msg) {
+    $(id).textContent = msg || "";
+    clearTimeout(errTimer);
+    if (msg) errTimer = setTimeout(() => { $(id).textContent = ""; }, 6000);
+  }
+  async function createRoom() {
+    $("createRoom").disabled = true;
+    try { enterRoom(await api("POST", "/api/rooms", { char: picks[0], name: myName() })); }
+    catch (e) { showErr("lobbyErr", e.message); }
+    finally { $("createRoom").disabled = false; }
+  }
+  async function joinRoom(code) {
+    code = (code || "").trim().toUpperCase();
+    if (!/^[A-Z]{5}$/.test(code)) return showErr("lobbyErr", "Room codes are 5 letters.");
+    try { enterRoom(await api("GET", `/api/rooms/${code}`)); }
+    catch (e) { showErr("lobbyErr", e.message); }
+  }
+  function enterRoom(s) {
+    setMode("online", true);
+    On.code = s.code; On.s = null; On.game = null; On.queue = []; On.lastN = 0;
+    history.replaceState(null, "", `?room=${s.code}`);
+    $("lobbyCard").hidden = true; $("roomCard").hidden = false;
+    $("roomCode").textContent = s.code;
+    handleState(s);
+    pollLoop(++On.pollToken);
+  }
+  function leaveRoom() {
+    On.pollToken++; On.code = null; On.s = null; On.game = null; On.queue = [];
+    history.replaceState(null, "", location.pathname);
+    $("lobbyCard").hidden = false; $("roomCard").hidden = true;
+    hideBanner();
+    buildPieces([]); currentIdx = winnerIdx = -1; markCurrent(null);
+    $("log").innerHTML = ""; renderRoster();
+    setWho(null, "Create a room, or join one with its code.");
+  }
+  async function pollLoop(token) {
+    let fails = 0;
+    while (On.code && token === On.pollToken) {
+      await sleep(document.hidden ? 4000 : 1000);
+      if (!On.code || token !== On.pollToken) return;
+      try {
+        const r = await api("GET", `/api/rooms/${On.code}?v=${On.s ? On.s.v : ""}`);
+        if (token !== On.pollToken) return;
+        fails = 0;
+        if (r.same) { On.offset = r.now * 1000 - Date.now(); renderOnline(); }
+        else handleState(r);
+      } catch (e) {
+        if (e.status === 404) { showErr("roomErr", e.message); leaveRoom(); showErr("lobbyErr", e.message); return; }
+        if (++fails >= 3) showErr("roomErr", "Connection trouble, retrying…");
+      }
+    }
+  }
+  const myName = () => cleanName(store.get("cl.name", ""));
+  function setMyName(v) {
+    v = cleanName(v);
+    store.set("cl.name", v);
+    for (const id of ["lobbyName", "seatName"]) if (document.activeElement !== $(id)) $(id).value = v;
+  }
+  const seatPieceList = s => s.seats.map(seat => ({ key: seat.id, color: seat.color, char: seat.char, name: seat.name, pos: seat.pos,
+    ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins, mine: seat.mine }));
+  const layoutKeyOf = s => s.seats.map(x => x.id + x.color).join("|");
+  function handleState(s) {
+    On.offset = s.now * 1000 - Date.now();
+    const fresh = !On.s || s.game !== On.game;
+    On.s = s;
+    if (fresh) {                                    // first load, or host started a new round: snap, no replay
+      On.game = s.game; On.queue = [];
+      On.lastN = s.events.reduce((m, e) => Math.max(m, e.n), 0);
+      snapToState();
+      $("log").innerHTML = "";
+      for (const ev of s.events) {
+        const p = pieces.find(q => q.key === ev.seat);
+        if (p) { const [h, c] = logText(ev); addLog(ev.n, p, h, c); }
+      }
+    } else {
+      for (const ev of s.events) if (ev.n > On.lastN) On.queue.push(ev);
+      On.lastN = s.events.reduce((m, e) => Math.max(m, e.n), On.lastN);
+      // Character swaps apply live; seats joining/leaving rebuild once nothing is animating.
+      s.seats.forEach(seat => { const p = pieces.find(q => q.key === seat.id); if (p) { setPieceChar(p, seat.char); setPieceName(p, seat.name); p.mine = seat.mine; } });
+      if (!On.animating && !On.queue.length && layoutKeyOf(s) !== On.layoutKey) snapToState();
+    }
+    drainQueue();
+    renderOnline();
+  }
+  function snapToState() {
+    const s = On.s;
+    hideBanner();
+    buildPieces(seatPieceList(s));
+    On.layoutKey = layoutKeyOf(s);
+    syncTurnMarkers();
+  }
+  function syncTurnMarkers() {
+    const s = On.s;
+    winnerIdx = s.winner ? s.seats.findIndex(x => x.id === s.winner) : -1;
+    currentIdx = s.status === "playing" ? s.current : -1;
+    markCurrent(pieces[currentIdx] || null);
+    renderRoster();
+    if (s.status === "over" && winnerIdx > -1) showWinner(pieces[winnerIdx], s.turn, s.isHost ? "Play again" : "");
+    else hideBanner();
+  }
+  async function drainQueue() {
+    if (On.animating) return;
+    On.animating = true;
+    const game = On.game;
+    renderOnline();
+    while (On.queue.length && game === On.game && mode === "online") {
+      const ev = On.queue.shift(), p = pieces.find(q => q.key === ev.seat);
+      if (p) await animateMove(p, ev);
+    }
+    On.animating = false;
+    if (game !== On.game || !On.s || mode !== "online") return;
+    // Reconcile with the server's truth (covers anything we could not animate).
+    const s = On.s;
+    if (layoutKeyOf(s) !== On.layoutKey) snapToState();
+    else {
+      s.seats.forEach(seat => {
+        const p = pieces.find(q => q.key === seat.id);
+        if (p) Object.assign(p, { pos: seat.pos, ladders: seat.ladders, chutes: seat.chutes, spins: seat.spins });
+      });
+      await settleAll();
+      syncTurnMarkers();
+    }
+    renderOnline();
+  }
+  function renderOnline() {
+    const s = On.s;
+    if (!s || mode !== "online") return;
+    const nameOf = seat => seat.name || charOf(seat.char).name;
+    const cur = s.status === "playing" ? s.seats[s.current] : null;
+    const mineCount = s.seats.filter(x => x.mine).length;
+    const busy = On.animating || On.queue.length > 0;
+    const ready = !busy && serverNow() >= s.readyAt - 0.3;
+
+    // seats: rebuilt only when something visible changed, and never while you are typing a name
+    const ul = $("seats");
+    const key = JSON.stringify([s.status, s.isHost, cur && cur.id, s.seats.map(x => [x.id, x.name, x.char, x.color, x.mine])]);
+    if (key !== ul.dataset.key && !ul.contains(document.activeElement)) {
+      ul.dataset.key = key;
+      ul.innerHTML = "";
+      s.seats.forEach((seat, i) => {
+        const ch = charOf(seat.char), li = document.createElement("li");
+        if (cur && seat.id === cur.id) li.className = "turn";
+        const canRemove = s.status !== "playing" && (seat.mine || s.isHost);
+        if (seat.mine) {
+          li.innerHTML = `<button class="seat pick" aria-label="Change your character (${esc(ch.name)})" title="${esc(ch.name)}: tap to change">` +
+            `${avatar(ch.img, seat.color)}</button>` +
+            `<input class="name" maxlength="20" autocomplete="off" placeholder="${esc(ch.name)}" aria-label="Your name">` +
+            `<span class="you">you</span>`;
+          const inp = li.querySelector("input");
+          inp.value = seat.name || "";
+          const commit = () => {
+            const v = cleanName(inp.value);
+            if (v !== (seat.name || "")) { setMyName(v); roomAction("name", { seat: seat.id, name: v }); }
+          };
+          inp.addEventListener("change", commit);
+          inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+          li.querySelector(".seat").onclick = () => {
+            const taken = {};
+            s.seats.forEach((o, j) => { if (o.id !== seat.id) taken[o.char] = { label: o.name || "P" + (j + 1), color: o.color }; });
+            openPicker("Pick your character", seat.char, taken, id => roomAction("char", { seat: seat.id, char: id }));
+          };
+        } else {
+          li.innerHTML = `<div class="seat">${avatar(ch.img, seat.color)}<span class="who2"><b>${esc(nameOf(seat))}</b>` +
+            `${seat.name ? `<small>${esc(ch.name)}</small>` : ""}</span></div>`;
+        }
+        if (canRemove) {
+          const x = document.createElement("button");
+          x.className = "x"; x.title = "Remove"; x.textContent = "✕";
+          x.setAttribute("aria-label", `Remove ${nameOf(seat)}`);
+          x.onclick = () => roomAction("leave", { seat: seat.id });
+          li.appendChild(x);
+        }
+        ul.appendChild(li);
+      });
+      if (!s.seats.length) ul.innerHTML = '<li class="hint">Nobody has joined yet.</li>';
+    }
+
+    $("joinSeatRow").hidden = !(s.status === "lobby" && s.seats.length < 6);
+    $("seatName").hidden = mineCount > 0;
+    $("joinSeat").textContent = mineCount ? "+ Add another player on this device" : "Join";
+
+    const myTurn = !!(cur && cur.mine);
+    $("spinRow").hidden = !myTurn;
+    $("spinBtn").disabled = !ready;
+    $("spinBtn").classList.toggle("go", myTurn && ready);
+    $("spinBtn").textContent = mineCount > 1 ? `Spin for ${nameOf(cur || s.seats[0])}!` : "Spin!";
+
+    $("hostBox").hidden = !s.isHost;
+    $("hostStart").textContent = s.status === "lobby" ? "Start game" : s.status === "over" ? "Play again" : "Restart";
+    $("hostStart").disabled = !s.seats.length;
+    $("hostSpin").hidden = !(cur && !cur.mine);
+    $("hostSpin").disabled = !ready;
+    if (cur && !cur.mine) $("hostSpin").textContent = `Spin for ${nameOf(cur)}`;
+    if (document.activeElement !== $("autoSpin")) { $("autoSpin").value = s.autoSpin; syncAutoSpinOut(); }
+
+    let status;
+    if (s.status === "lobby") status = s.isHost ? "Send the link, wait for everyone to pick a character, then Start." : "Waiting for the host to start the game.";
+    else if (s.status === "over") status = "Game over." + (s.isHost ? " Play again keeps the same players." : " Waiting for the host to start another round.");
+    else status = `Turn ${s.turn + 1}. ${s.autoSpin ? `Auto-spin after ${s.autoSpin}s of waiting.` : ""}`;
+    $("roomStatus").textContent = status;
+
+    if (busy) return;                             // the animation owns the turn text while it runs
+    if (s.status === "lobby") setWho(null, s.seats.length ? `${s.seats.length} player${s.seats.length > 1 ? "s" : ""} in the room.` : "Waiting for players.");
+    else if (cur) {
+      const p = pieces[s.current];
+      if (!p) return;
+      let msg = myTurn ? "Your turn! Hit Spin." : `Waiting for ${nameOf(cur)} to spin.`;
+      if (s.autoSpin && ready) {
+        const left = Math.max(0, Math.ceil(s.readyAt + s.autoSpin - serverNow()));
+        msg += ` Auto-spin in ${left}s.`;
+      }
+      setWho(p, msg);
+    }
+  }
+  async function roomAction(action, body = {}) {
+    if (!On.code) return;
+    try { handleState(await api("POST", `/api/rooms/${On.code}/${action}`, body)); }
+    catch (e) { showErr("roomErr", e.message); }
+  }
+  function onlineSpin() {
+    if (!On.s || $("spinRow").hidden && $("hostSpin").hidden) return;
+    $("spinBtn").disabled = $("hostSpin").disabled = true;
+    roomAction("spin", { expect: On.s.turn });
+  }
+  function syncAutoSpinOut() {
+    const v = +$("autoSpin").value;
+    $("autoSpinOut").textContent = v ? `after ${v}s` : "off";
+  }
+
+  // ================= Mode switching =================
+  let mode = "local";
+  function setMode(m, quiet) {
+    if (m === mode && !quiet) return;
+    mode = m;
+    $("tabLocal").classList.toggle("on", m === "local");
+    $("tabOnline").classList.toggle("on", m === "online");
+    $("tabLocal").setAttribute("aria-selected", m === "local");
+    $("tabOnline").setAttribute("aria-selected", m === "online");
+    $("localPanel").hidden = m !== "local";
+    $("onlinePanel").hidden = m !== "online";
+    hideBanner();
+    $("log").innerHTML = "";
+    if (m === "local") {
+      if (On.code) leaveRoom();
+      localIdle();
+    } else {
+      Lc.loopId++; Lc.playing = false;
+      if (!On.code) {
+        buildPieces([]); currentIdx = winnerIdx = -1; renderRoster();
+        setWho(null, "Create a room, or join one with its code.");
+      }
+    }
+  }
+
+  // ---------- Wire up ----------
+  drawBoard();
+  drawSpinner();
+  $("players").value = clampPlayers(store.get("cl.players", 3));
+  $("interval").value = Math.min(5, Math.max(0, parseFloat(store.get("cl.interval", 1)) || 0));
+  syncInterval();
+  $("interval").addEventListener("input", syncInterval);
+  const setPlayers = v => {
+    $("players").value = clampPlayers(v); store.set("cl.players", $("players").value);
+    renderPicks();
+    // Not started yet: redraw the waiting pieces. Mid-game: the new count applies on New game.
+    if (mode === "local" && Lc.turn === 0 && !Lc.busy && !Lc.playing) localIdle();
+  };
+  $("minus").onclick = () => setPlayers(+$("players").value - 1);
+  $("plus").onclick = () => setPlayers(+$("players").value + 1);
+  $("players").addEventListener("change", e => setPlayers(e.target.value));
+  $("startBtn").onclick = localStart;
+  $("playBtn").onclick = () => localSetPlaying(!Lc.playing);
+  $("stepBtn").onclick = () => { if (!Lc.playing) localRun(); };
+  $("shuffleBtn").onclick = () => { picks = []; fillPicks(); applyPicks(); };
+  $("againBtn").onclick = () => { if (mode === "local") localStart(); else roomAction("start"); };
+  $("closeBanner").onclick = hideBanner;
+  $("pickerClose").onclick = closePicker;
+  $("picker").addEventListener("click", e => { if (e.target === $("picker")) closePicker(); });
+  $("tabLocal").onclick = () => setMode("local");
+  $("tabOnline").onclick = () => setMode("online");
+  $("createRoom").onclick = createRoom;
+  $("joinRoom").onclick = () => joinRoom($("joinCode").value);
+  $("joinCode").addEventListener("keydown", e => { if (e.key === "Enter") joinRoom($("joinCode").value); });
+  $("joinSeat").onclick = () => {
+    const taken = new Set((On.s ? On.s.seats : []).map(x => x.char));
+    // A second seat on the same device starts unnamed so it does not copy your name.
+    const mine = On.s && On.s.seats.some(x => x.mine);
+    roomAction("join", { char: picks.find(id => !taken.has(id)), name: mine ? "" : myName() });
+  };
+  for (const id of ["lobbyName", "seatName"]) {
+    $(id).value = myName();
+    $(id).addEventListener("input", () => setMyName($(id).value));
+  }
+  $("spinBtn").onclick = onlineSpin;
+  $("hostSpin").onclick = onlineSpin;
+  $("hostStart").onclick = () => {
+    if (On.s && On.s.status === "playing" && !confirm("Restart the game from the beginning?")) return;
+    roomAction("start");
+  };
+  $("autoSpin").addEventListener("input", syncAutoSpinOut);
+  $("autoSpin").addEventListener("change", () => roomAction("settings", { autoSpin: +$("autoSpin").value }));
+  $("leaveRoom").onclick = () => setMode("local");
+  $("copyLink").onclick = async () => {
+    const url = `${location.origin}${location.pathname}?room=${On.code}`;
+    try { await navigator.clipboard.writeText(url); $("copyLink").textContent = "Copied!"; }
+    catch { prompt("Copy this link:", url); }
+    setTimeout(() => { $("copyLink").textContent = "Copy link"; }, 1600);
+  };
+  document.addEventListener("keydown", e => {
+    if (!$("picker").hidden) { if (e.key === "Escape") closePicker(); return; }
+    if (e.target.closest("input, button")) return;   // focused controls keep their own keys
+    if (mode === "local") {
+      if (e.key === " ") { e.preventDefault(); if (!Lc.winner) localSetPlaying(!Lc.playing); }
+      else if (e.key === "ArrowRight" && !Lc.playing) { e.preventDefault(); localRun(); }
+    } else if (e.key === " " && !$("spinRow").hidden && !$("spinBtn").disabled) { e.preventDefault(); onlineSpin(); }
+  });
+
+  renderPicks();
+  const roomParam = new URLSearchParams(location.search).get("room");
+  if (roomParam) { setMode("online"); $("joinCode").value = roomParam.toUpperCase(); joinRoom(roomParam); }
+  else localIdle();
+})();
+</script>
+</body>
+</html>
