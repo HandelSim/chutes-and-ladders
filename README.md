@@ -28,7 +28,7 @@ Pickpocket     steal a charge from a rival who has one, then spin
 Wild Card      fate picks one of the other abilities at random (never Pick a Number) and plays it
 ```
 
-There are 79 characters. Besides the original licensed-character set there are emoji-drawn ones in four
+There are 79 characters. Besides the original licensed-character set there are real-photo ones in four
 extra groups (Office Chaos, Everyday Objects, Halloween, Weirdos); they live at the end of `static/chars.js`
 and every id there must also have an entry in `CHAR_AB` (`test_rules.py` checks this).
 
@@ -64,7 +64,7 @@ rules.py                the whole game engine (turns, abilities, boards, minigam
 sim.py                  balance simulator for rules.py
 suggest.py              suggestion box intake (screening, rate limits, status feed)
 static/index.html       the client (SVG board, animations, ability UI, minigame overlay, update pill)
-static/chars.js         79 characters: 45 embedded WebP data URIs plus 34 emoji SVG ones (nothing hotlinks)
+static/chars.js         79 characters: 79 embedded 96x96 WebP data URIs (nothing hotlinks)
 static/minigames/*.js   the nine minigames (d.js holds the Halloween three)
 test_rules.py           unit tests for rules.py and the character and minigame tables
 data/                   SQLite rooms + suggestions (gitignored)
