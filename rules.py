@@ -38,6 +38,7 @@ PICK_COST = 2           # charges a Pick costs
 SWAP_RANGE = 18         # max squares ahead the swap target may be (0 = any)
 SHIELD_HITS = 1         # chutes a raised shield blocks
 OVERTIME_ROUND = 50     # from this round on abilities are off, so every game ends (0 = never)
+TURBO_BONUS = 2         # extra squares Rocket Boots add to a single spin
 ABILITIES = {
     "boost":  {"label": "Double Spin", "icon": "⏩", "desc": "Spin twice and move the total."},
     "lucky":  {"label": "Lucky Spin", "icon": "🍀", "desc": f"Spin {LUCKY_SPINS} times and keep the best result."},
@@ -45,6 +46,9 @@ ABILITIES = {
     "shield": {"label": "Chute Shield", "icon": "🛡️", "desc": "The next chute you land on does nothing. Then spin."},
     "swap":   {"label": "Swap", "icon": "🔄", "desc": f"Trade places with the nearest player ahead (up to {SWAP_RANGE} squares), instead of spinning."},
     "quake":  {"label": "Quake", "icon": "💥", "desc": f"Everyone ahead of you drops back up to {QUAKE_BACK} squares, never behind you. Then you spin."},
+    "turbo":  {"label": "Rocket Boots", "icon": "🚀", "desc": f"Spin once and move {TURBO_BONUS} extra squares."},
+    "thief":  {"label": "Pickpocket", "icon": "🦝", "desc": "Steal an ability charge from a rival who has one. Then spin."},
+    "wild":   {"label": "Wild Card", "icon": "🎲", "desc": "Fate picks one of the other abilities at random and plays it for you."},
 }
 CHAR_AB = {
     # Double Spin
@@ -70,6 +74,23 @@ CHAR_AB = {
     # Quake
     "bowser": ("quake", "Ground Pound"), "donkey-kong": ("quake", "Hand Slap"), "charizard": ("quake", "Flamethrower"),
     "shrek": ("quake", "Ogre Roar"), "spongebob": ("quake", "Bubble Blast"), "kermit": ("quake", "Showstopper"),
+    # Office Chaos
+    "michael-scott": ("wild", "World's Best Boss"), "dwight-schrute": ("quake", "Fire Drill"),
+    "jim-halpert": ("swap", "Desk Prank"), "kevin-malone": ("lucky", "Famous Chili"),
+    # Everyday Objects
+    "toaster": ("turbo", "Pop Up"), "roomba": ("turbo", "Zoom Zoom"), "popcorn": ("turbo", "Pop Pop Pop"),
+    "traffic-cone": ("shield", "Road Closed"), "potato": ("shield", "Couch Potato"),
+    "rubber-duck": ("lucky", "Quack Quack"), "banana": ("swap", "Peel Out"),
+    "rock": ("pick", "Rock Solid"), "cactus": ("quake", "Prickly Hug"), "bowling-ball": ("quake", "Strike"),
+    "disco-ball": ("boost", "Disco Fever"), "pizza": ("boost", "Extra Cheese"), "robot": ("boost", "Beep Boop"),
+    "sock": ("thief", "Lost Sock"), "trash-can": ("thief", "Dumpster Dive"), "magic-8-ball": ("wild", "Ask Again Later"),
+    # Halloween
+    "pumpkin": ("turbo", "Jack-o'-Rocket"), "ghost": ("swap", "Boo!"), "vampire": ("thief", "Midnight Bite"),
+    "skeleton": ("pick", "Bone Dice"), "witch": ("wild", "Cauldron Brew"), "zombie": ("quake", "Zombie Stomp"),
+    "spider": ("shield", "Web Net"), "bat": ("boost", "Echo Dash"), "black-cat": ("lucky", "Nine Lives"),
+    # Weirdos
+    "clown": ("wild", "Honk Honk"), "alien": ("swap", "Abduction"), "dino": ("quake", "Tiny Arms Slam"),
+    "unicorn": ("pick", "Rainbow Aim"), "raccoon": ("thief", "Trash Panda Snack"),
 }
 
 
@@ -80,6 +101,29 @@ def cost_of(kind):
 def quake_targets(room, seat):
     return [s for s in room["seats"] if s is not seat and s["pos"] > 0 and not s.get("steady")
             and (not QUAKE_AHEAD or s["pos"] > seat["pos"])]
+
+
+def thief_targets(room, seat):
+    return [s for s in room["seats"] if s is not seat and s.get("charges", 0) > 0]
+
+
+def thief_target(room, seat):
+    """The rival a Pickpocket robs: most charges, then furthest ahead."""
+    return max(thief_targets(room, seat), key=lambda s: (s["charges"], s["pos"]))
+
+
+def wild_kind(room, seat):
+    """Wild Card: a random usable ability from the other archetypes (never Pick a Number)."""
+    options = ["boost", "lucky", "turbo"]
+    if not seat.get("shield"):
+        options.append("shield")
+    if ahead_of(room, seat):
+        options.append("swap")
+    if quake_targets(room, seat):
+        options.append("quake")
+    if thief_targets(room, seat):
+        options.append("thief")
+    return RNG.choice(options)
 
 
 def ab_of(seat):
@@ -95,6 +139,9 @@ MINIGAMES = {
     "headcount": {"max": 450, "mean": 225, "sd": 80},
     "gamble":    {"max": 100, "mean": 54, "sd": 20},
     "dodge":     {"max": 180, "mean": 104, "sd": 31},
+    "smash":     {"max": 400, "mean": 110, "sd": 35},
+    "candy":     {"max": 450, "mean": 120, "sd": 40},
+    "oddone":    {"max": 350, "mean": 190, "sd": 60},
 }
 MINI_PLAY = 15            # seconds of play per game
 MINI_INTRO = 7            # seconds of rules + countdown before play starts (online)
@@ -171,6 +218,10 @@ def spawn_boss(room, seat, steps):
 # Stored in room["board"]["specials"] = {"lucky": [..], "unlucky": [..]}.
 SPECIAL_COUNT = 3
 SPECIAL_MOVE = 3
+# Jumpscare squares: a couple of extra marked squares that startle the player who lands
+# there and send them SCARE_MOVE back. Stored as specials["scare"].
+SCARE_COUNT = 2
+SCARE_MOVE = 2
 
 
 def spawn_specials(room, seat, steps):
@@ -187,14 +238,24 @@ def spawn_specials(room, seat, steps):
     lucky = RNG.sample([n for n in range(5, 91) if n not in used], SPECIAL_COUNT)
     used.update(lucky)
     unlucky = RNG.sample([n for n in range(5, 99) if n not in used], SPECIAL_COUNT)
-    board["specials"] = {"lucky": sorted(lucky), "unlucky": sorted(unlucky)}
+    used.update(unlucky)
+    scare = RNG.sample([n for n in range(8, 95) if n not in used], SCARE_COUNT)
+    board["specials"] = {"lucky": sorted(lucky), "unlucky": sorted(unlucky), "scare": sorted(scare)}
     steps.append({"t": "special", "do": "spawn", "seat": seat["id"],
-                  "lucky": board["specials"]["lucky"], "unlucky": board["specials"]["unlucky"]})
+                  "lucky": board["specials"]["lucky"], "unlucky": board["specials"]["unlucky"],
+                  "scare": board["specials"]["scare"]})
 
 
 def special_at(room, sq):
     sp = (room.get("board") or {}).get("specials") or {}
-    return "lucky" if sq in sp.get("lucky", ()) else "unlucky" if sq in sp.get("unlucky", ()) else None
+    for kind in ("lucky", "unlucky", "scare"):
+        if sq in sp.get(kind, ()):
+            return kind
+    return None
+
+
+def special_move(kind):
+    return {"lucky": SPECIAL_MOVE, "unlucky": -SPECIAL_MOVE, "scare": -SCARE_MOVE}[kind]
 
 
 def gain_charge(room, seat, steps, why):
@@ -282,6 +343,8 @@ def ability_problem(room, seat, kind):
         return "Nobody is ahead of you to swap with."
     if kind == "quake" and not quake_targets(room, seat):
         return "Nobody ahead of you to knock back." if QUAKE_AHEAD else "Nobody else is on the board yet."
+    if kind == "thief" and not thief_targets(room, seat):
+        return "Nobody else has a charge to steal."
     return None
 
 
@@ -290,7 +353,7 @@ def _mean(xs):
     return sum(xs) / len(xs)
 
 
-T = {"pick": 6, "boost": 4.5, "lucky": 5, "swap": 9, "quake": 7}
+T = {"pick": 6, "boost": 4.5, "lucky": 5, "swap": 9, "quake": 7, "turbo": 2.5}
 LUCKY_T = 5
 
 
@@ -312,6 +375,13 @@ def cpu_choice(room, seat):
     if kind == "lucky":
         ev = _mean(max(outcome(pos, a, sh, bd), outcome(pos, b, sh, bd)) for a in range(1, 7) for b in range(1, 7))
         return ev - normal >= LUCKY_T, None
+    if kind == "turbo":
+        ev = _mean(outcome(pos, r + TURBO_BONUS, sh, bd) for r in range(1, 7))
+        return ev - normal >= T["turbo"], None
+    if kind == "thief":
+        return True, None                           # the charge comes straight back, so it is free
+    if kind == "wild":
+        return True, None
     if kind == "shield":
         return any(pos + r in bd[1] for r in range(1, 7)), None
     if kind == "swap":
@@ -353,6 +423,9 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
             if not isinstance(pick, int) or not 1 <= pick <= PICK_MAX:
                 raise ValueError(f"Pick a number from 1 to {PICK_MAX}.")
         seat["charges"] -= cost_of(kind)
+    wild = use and kind == "wild"
+    if wild:
+        kind = wild_kind(room, seat)                # Wild Card plays a random ability for you
     room["seq"] = room.get("seq", room["turn"]) + 1
     room["turn"] += 1
     steps = []
@@ -362,6 +435,15 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
     spawn_specials(room, seat, steps)
     if use:
         steps.append({"t": "ability", "seat": seat["id"], "ab": kind})
+    if wild:
+        steps.append({"t": "wild", "seat": seat["id"], "ab": kind})
+    if use and kind == "thief":
+        victim = thief_target(room, seat)
+        victim["charges"] -= 1
+        seat["charges"] = min(MAX_CHARGES, seat["charges"] + 1)
+        steps.append({"t": "charge", "seat": victim["id"], "n": victim["charges"], "why": "stolen"})
+        steps.append({"t": "charge", "seat": seat["id"], "n": seat["charges"], "why": "steal"})
+        ev["target"] = victim["id"]
     if use and kind == "swap":
         t = ahead_of(room, seat)
         seat["pos"], t["pos"] = t["pos"], seat["pos"]
@@ -394,6 +476,8 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
         else:
             roll = RNG.randint(1, 6)
             steps.append({"t": "spin", "seat": seat["id"], "v": roll})
+            if use and kind == "turbo":
+                roll += TURBO_BONUS
         ev["roll"] = roll
         before = seat["pos"]
         boss = boss_of(room)
@@ -416,7 +500,7 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
             if kindsq:
                 ev["special"] = kindsq
                 steps.append({"t": "special", "do": kindsq, "seat": seat["id"], "sq": seat["pos"]})
-                move_by(room, seat, SPECIAL_MOVE if kindsq == "lucky" else -SPECIAL_MOVE, steps, resolve=False)
+                move_by(room, seat, special_move(kindsq), steps, resolve=False)
     ev["to"] = seat["pos"]
     seat["spins"] += 1
     seat["steady"] = False

@@ -23,7 +23,18 @@ Pick a Number  costs 2 charges: choose your spin, 1 to 3
 Chute Shield   the next chute you land on does nothing, then spin
 Swap           trade places with the nearest player ahead (up to 18 squares) instead of spinning
 Quake          everyone ahead of you drops back up to 10 squares (never behind you), then spin
+Rocket Boots   spin once and move 2 extra squares
+Pickpocket     steal a charge from a rival who has one, then spin
+Wild Card      fate picks one of the other abilities at random (never Pick a Number) and plays it
 ```
+
+There are 79 characters. Besides the original licensed-character set there are emoji-drawn ones in four
+extra groups (Office Chaos, Everyday Objects, Halloween, Weirdos); they live at the end of `static/chars.js`
+and every id there must also have an entry in `CHAR_AB` (`test_rules.py` checks this).
+
+Marked squares (dealt the first time anyone plays): 3 lucky (+3), 3 unlucky (-3) and 2 jumpscare squares.
+Landing on a jumpscare square flashes a full-screen ghost with a short synth screech (silent with reduced
+motion) and moves you back 2.
 
 Balance is checked with `sim.py` (CPU policy vs CPU policy, classic and random boards, 2 to 6 players):
 every ability lands within roughly 0.85x to 1.2x of a fair win share.
@@ -40,6 +51,9 @@ Pad Recall     repeat a growing pad sequence, one mistake ends it
 Head Count     count one character in a 2 s crowd flash, 3 rounds
 Ladder Gamble  climb rung by rung for points, bank before it breaks
 Chute Dodge    steer between 3 lanes down a chute for 12 s
+Pumpkin Smash  tap pumpkins (+10) and golden stars (+30) in a 3x3 patch, leave ghosts alone (-15), 12 s
+Candy Catch    slide a basket under falling treats, dodge spiders (-20), 13 s
+Odd One Out    5 crowded grids, tap the one look-alike, faster is worth more
 ```
 
 ## Pieces
@@ -50,8 +64,9 @@ rules.py                the whole game engine (turns, abilities, boards, minigam
 sim.py                  balance simulator for rules.py
 suggest.py              suggestion box intake (screening, rate limits, status feed)
 static/index.html       the client (SVG board, animations, ability UI, minigame overlay, update pill)
-static/chars.js         45 characters as embedded WebP data URIs (nothing hotlinks)
-static/minigames/*.js   the six minigames (two per file)
+static/chars.js         79 characters: 45 embedded WebP data URIs plus 34 emoji SVG ones (nothing hotlinks)
+static/minigames/*.js   the nine minigames (d.js holds the Halloween three)
+test_rules.py           unit tests for rules.py and the character and minigame tables
 data/                   SQLite rooms + suggestions (gitignored)
 ```
 
@@ -63,7 +78,8 @@ Every response carries a `build` id (hash of the code). When it changes, open pa
 available" button at the top right instead of reloading in the middle of a game.
 Accepted suggestions deploy themselves: static-only changes go out at once (open pages keep what they loaded
 until the player taps the button), and anything that needs a server restart waits until no game is in progress.
-The page is dark only.
+The page is dark only, with a Halloween theme (orange accent, drifting bats and ghosts that stop under
+reduced motion).
 
 ## Run
 

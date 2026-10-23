@@ -13,9 +13,9 @@
 :root{
   /* Dark only (owner request): no light palette, and native controls render dark too. */
   color-scheme:dark;
-  --bg:#1a1917; --panel:#24221f; --ink:#efe7db; --muted:#a99f92; --line:#3a362f;
-  --accent:#4fb39d; --accent-ink:#0f1a17; --accent-soft:#1f3a33;
-  --c1:#4d4124; --c2:#2e4630; --c3:#273c4e; --c4:#4e302c; --c5:#3b3350;
+  --bg:#17131c; --panel:#221c2a; --ink:#f1e6d8; --muted:#b0a3a0; --line:#40344a;
+  --accent:#ff8a2b; --accent-ink:#1a0d03; --accent-soft:#3d2410;
+  --c1:#4f3818; --c2:#2f4229; --c3:#2b2a4d; --c4:#512a2a; --c5:#3e2c55;
   --grid:#5d5447; --num:#ddd1c0; --finish:#8a6d1c;
   --rail:#c48a4e; --rung:#e0a868;
   --start:#2e2b26; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
@@ -141,7 +141,7 @@ input.text{font:inherit;font-weight:600;padding:9px 12px;border:1px solid var(--
 #seats .x{min-width:40px;padding:0}
 button.big{font-size:20px;min-height:54px;font-family:Fredoka,system-ui,sans-serif}
 button.go{animation:glow 1.1s ease-in-out infinite}
-@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(47,125,109,.55)}50%{box-shadow:0 0 0 8px rgba(47,125,109,0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,138,43,.55)}50%{box-shadow:0 0 0 8px rgba(255,138,43,0)}}
 .host{border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
 #roster .mine-tag{font-size:11px;color:var(--muted);font-weight:600;margin-left:6px}
 @media (prefers-reduced-motion:reduce){button.go{animation:none}}
@@ -252,10 +252,37 @@ details.help p{margin:6px 0 0}
 .chip.st-building{background:#f29e02;color:#1f1b17}
 .chip.st-rejected,.chip.st-failed{background:#d1495b;color:#fff}
 @media (prefers-reduced-motion:reduce){.pips.pulse,.ab-banner.show,.picker .sheet{animation:none}}
+/* ---- Halloween ---- */
+body{background:radial-gradient(ellipse at 50% -10%,#3a1a52 0,#241431 38%,var(--bg) 75%) fixed,var(--bg)}
+.wrap{position:relative;z-index:1}
+h1{color:#ffb05c;text-shadow:0 0 14px rgba(255,138,43,.55),0 2px 0 #5a2a05}
+h1::before{content:"🎃 "}
+h1::after{content:" 🦇"}
+.board-wrap{box-shadow:0 0 0 1px rgba(255,138,43,.25),0 0 26px rgba(138,60,200,.28),var(--shadow)}
+.card{box-shadow:0 0 0 1px rgba(255,138,43,.08),var(--shadow)}
+.spooky{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.spooky span{position:absolute;opacity:.55;font-size:34px;animation:drift 18s linear infinite;will-change:transform}
+.spooky span:nth-child(1){top:6%;left:-8%;animation-duration:22s}
+.spooky span:nth-child(2){top:22%;left:-8%;font-size:26px;animation-duration:30s;animation-delay:-9s}
+.spooky span:nth-child(3){top:58%;left:-8%;font-size:40px;animation-duration:36s;animation-delay:-20s}
+.spooky span:nth-child(4){top:80%;left:-8%;font-size:28px;animation-duration:26s;animation-delay:-5s}
+.spooky span:nth-child(5){top:40%;left:-8%;font-size:30px;animation-duration:42s;animation-delay:-30s}
+.spooky .web{top:0;left:0;animation:none;font-size:70px;opacity:.35}
+.spooky .web.r{left:auto;right:0;transform:scaleX(-1)}
+@keyframes drift{0%{transform:translate(0,0) rotate(-6deg)}25%{transform:translate(28vw,-30px) rotate(6deg)}50%{transform:translate(56vw,20px) rotate(-6deg)}75%{transform:translate(84vw,-24px) rotate(6deg)}100%{transform:translate(112vw,0) rotate(-6deg)}}
+@media (prefers-reduced-motion:reduce){.spooky span{animation:none;left:auto;opacity:.25}.spooky span:nth-child(n+3):not(.web){display:none}}
+.scare{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:#000;color:#fff;pointer-events:none;animation:scare .9s ease-out forwards}
+.scare b{font:700 clamp(40px,12vw,120px)/1 Fredoka,system-ui,sans-serif;color:#e5484d;text-shadow:0 0 30px #e5484d;letter-spacing:4px}
+.scare .face{font-size:clamp(160px,50vw,420px);line-height:1;animation:scareZoom .9s ease-out forwards}
+@keyframes scare{0%{opacity:0}8%{opacity:1}55%{opacity:1}100%{opacity:0}}
+@keyframes scareZoom{0%{transform:scale(.3) rotate(-8deg)}15%{transform:scale(1.15) rotate(6deg)}30%{transform:scale(1) rotate(-4deg)}100%{transform:scale(1.25) rotate(2deg)}}
+@media (prefers-reduced-motion:reduce){.scare{animation:scareSoft 1s ease-out forwards}.scare .face{animation:none;font-size:clamp(100px,30vw,240px)}@keyframes scareSoft{0%{opacity:0}20%{opacity:.85}100%{opacity:0}}}
 @media (max-width:420px){.wrap{padding:14px 10px 30px}h1{font-size:25px}#spinner{width:96px;height:96px}#picks li button:first-child{flex-basis:44%}}
 </style>
 </head>
 <body>
+<div class="spooky" aria-hidden="true"><span>🦇</span><span>👻</span><span>🦇</span><span>🎃</span><span>🕷️</span><span class="web">🕸️</span><span class="web r">🕸️</span></div>
 <button class="pill" id="updPill" hidden>New version available. Tap to update</button>
 <div class="wrap">
   <header>
@@ -570,14 +597,16 @@ details.help p{margin:6px 0 0}
   function drawSpecials(sp) {
     specLayer.replaceChildren();
     if (!sp) return;
-    for (const [kind, icon, col] of [["lucky", "🍀", "#3fb950"], ["unlucky", "💀", "#a371f7"]]) {
+    const tips = { lucky: n => `Lucky square ${n}: jump forward 3.`, unlucky: n => `Unlucky square ${n}: slip back 3.`,
+      scare: n => `Jumpscare square ${n}: you get a fright and slip back 2.` };
+    for (const [kind, icon, col] of [["lucky", "🍀", "#3fb950"], ["unlucky", "💀", "#a371f7"], ["scare", "👻", "#ff8a2b"]]) {
       for (const n of sp[kind] || []) {
         const c = center(+n);
         el("circle", { cx: c.x, cy: c.y, r: 30, fill: col, opacity: .35, stroke: col, "stroke-width": 4 }, specLayer);
         const t = el("text", { x: c.x, y: c.y + 12, "text-anchor": "middle", "font-size": 32 }, specLayer);
         t.textContent = icon;
         const ti = el("title", {}, specLayer);
-        ti.textContent = kind === "lucky" ? `Lucky square ${n}: jump forward 3.` : `Unlucky square ${n}: slip back 3.`;
+        ti.textContent = tips[kind](n);
       }
     }
   }
@@ -726,6 +755,7 @@ details.help p{margin:6px 0 0}
     if (seat.charges < ab.cost) return (seat.charges <= 0 ? "No ability charges left." : `This ability needs ${ab.cost} charges.`) +
       " Slide down a chute or win a minigame to earn one.";
     if (ab.kind === "shield" && seat.shield) return "Your shield is already up.";
+    if (ab.kind === "thief" && !s.seats.some(o => o !== seat && o.charges > 0)) return "Nobody else has a charge to steal.";
     const bs = s.board && s.board.boss && s.board.boss.hp > 0 ? s.board.boss.sq : 0;
     if (ab.kind === "swap" && !s.seats.some(o => o !== seat && o.pos > seat.pos && (!SWAP_RANGE || o.pos - seat.pos <= SWAP_RANGE) && !(bs && seat.pos <= bs && bs < o.pos)))
       return "Nobody is ahead of you to swap with.";
@@ -830,6 +860,29 @@ details.help p{margin:6px 0 0}
     const c = el("circle", { cx: p.x, cy: p.y, r: 30, fill: "none", stroke: color, "stroke-width": 7 }, $("tokens"));
     await tween(REDUCED ? 300 : 650, t => { c.setAttribute("r", 30 + t * grow); c.setAttribute("opacity", 1 - t); });
     c.remove();
+  }
+  // Full-screen jumpscare for the scare squares: a flash, a big ghost and a short synth screech.
+  function scareSound() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC || REDUCED) return;
+      const ac = new AC(), o = ac.createOscillator(), vol = ac.createGain(), t = ac.currentTime;
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(760, t);
+      o.frequency.exponentialRampToValueAtTime(90, t + .6);
+      vol.gain.setValueAtTime(.16, t);
+      vol.gain.exponentialRampToValueAtTime(.001, t + .7);
+      o.connect(vol); vol.connect(ac.destination);
+      o.start(t); o.stop(t + .75);
+      setTimeout(() => ac.close(), 1000);
+    } catch { /* no audio */ }
+  }
+  async function jumpscare() {
+    const d = h("div", { class: "scare", "aria-hidden": "true" }, h("div", { class: "face", text: "👻" }), h("b", { text: "BOO!" }));
+    document.body.appendChild(d);
+    scareSound();
+    await sleep(950 * Math.max(SPEED, .6));
+    d.remove();
   }
   async function abilityBanner(p, ab) {
     const b = $("abBanner");
@@ -941,15 +994,24 @@ details.help p{margin:6px 0 0}
       } else if (st.t === "special") {
         if (st.do === "spawn") {
           drawSpecials(st);
-          setWho(p, "🍀 Lucky and 💀 unlucky squares are marked on the board.");
+          setWho(p, "🍀 Lucky, 💀 unlucky and 👻 jumpscare squares are marked on the board.");
           await sleep(600 * Math.max(SPEED, .6));
+        } else if (st.do === "scare") {
+          setWho(p, "👻 JUMPSCARE! You jump back 2 squares.");
+          await jumpscare();
         } else {
           setWho(p, st.do === "lucky" ? "🍀 Lucky square! Jump forward 3." : "💀 Unlucky square! Slip back 3.");
           await ringFx(p, st.do === "lucky" ? "#3fb950" : "#a371f7", 36);
         }
+      } else if (st.t === "wild") {
+        const A = RL.ABILITIES[st.ab] || {};
+        if (st.ab === "shield") p.shield = Math.max(1, p.shield);
+        setWho(p, `🎲 Fate picks ${A.icon || ""} ${A.label || st.ab}!`);
+        await sleep(700 * Math.max(SPEED, .6));
       } else if (st.t === "charge") {
         p.charges = st.n;
-        setWho(p, `+1 charge (${st.why === "chute" ? "slid down a chute" : st.why === "boss" ? "beat the boss" : "won the minigame"}).`);
+        setWho(p, st.why === "stolen" ? "A pickpocket took a charge!" : st.why === "steal" ? "Stole a charge!" :
+          `+1 charge (${st.why === "chute" ? "slid down a chute" : st.why === "boss" ? "beat the boss" : "won the minigame"}).`);
         renderRoster(st.seat);
         await ringFx(p, "var(--accent)", 24);
       }
@@ -1022,9 +1084,14 @@ details.help p{margin:6px 0 0}
       const hit = stepsOf(ev).filter(s => s.t === "move" && s.seat !== ev.seat).length;
       pre += `knocked back ${plural(hit, "player")}, `;
     }
+    if (ev.ab === "thief") {
+      const q = pieceOf(ev.target);
+      pre += `stole a charge from ${esc(q ? q.name : "?")}, `;
+    }
     const sv = stepsOf(ev).filter(s => s.t === "spin" && !s.keep).map(s => s.v);
     const rolled = ev.rolls ? `spun ${ev.rolls.join(", ")}, kept ${ev.roll}` : ev.ab === "pick" ? `picked ${ev.roll}`
-      : ev.ab === "boost" && sv.length > 1 ? `spun ${sv.join(" + ")} = ${ev.roll}` : `spun ${ev.roll}`;
+      : ev.ab === "boost" && sv.length > 1 ? `spun ${sv.join(" + ")} = ${ev.roll}`
+      : ev.ab === "turbo" && sv.length === 1 ? `spun ${sv[0]} + ${ev.roll - sv[0]} = ${ev.roll}` : `spun ${ev.roll}`;
     let t, cls = "";
     if (ev.via === "bounce") t = `${rolled}, needs ${100 - ev.from}, stays on ${ev.from}`;
     else if (ev.via === "boss") {
