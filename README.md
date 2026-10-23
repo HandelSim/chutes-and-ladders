@@ -13,7 +13,8 @@ Every change is a commit here; releases are tags (`v1.0.0` is the original autop
 ## Abilities
 
 Every character has one ability (flavor name per character, see `CHAR_AB` in `rules.py`). Using one costs a
-charge. You start with 1 charge, hold at most 2, and earn one by sliding down a chute or winning a minigame.
+charge. You start with 1 charge, hold at most 2, and earn one by sliding down a chute or winning a minigame
+or a duel.
 Abilities switch off after round 50 (overtime) so long games finish.
 
 ```
@@ -24,7 +25,7 @@ Chute Shield   the next chute you land on does nothing, then spin
 Swap           trade places with the nearest player ahead (up to 18 squares) instead of spinning
 Quake          everyone ahead of you drops back up to 10 squares (never behind you), then spin
 Rocket Boots   spin once and move 2 extra squares
-Pickpocket     steal a charge from a rival who has one, then spin
+Pickpocket     steal a charge from each of the two richest rivals, then spin
 Wild Card      fate picks one of the other abilities at random (never Pick a Number) and plays it
 ```
 
@@ -37,7 +38,10 @@ Landing on a jumpscare square flashes a full-screen ghost with a short synth scr
 motion) and moves you back 2.
 
 Balance is checked with `sim.py` (CPU policy vs CPU policy, classic and random boards, 2 to 6 players):
-every ability lands within roughly 0.85x to 1.2x of a fair win share.
+every ability lands within roughly 0.85x to 1.2x of a fair win share on the classic board (random boards
+run a little wider: Rocket Boots about 0.81x, Chute Shield about 1.23x at 4 players). `DUELS=0` turns duels
+off in the sim. Pickpocket robs two rivals because duels hand out charges that every other ability turns
+into squares.
 
 ## Minigames
 
@@ -56,6 +60,25 @@ Candy Catch    slide a basket under falling treats, dodge spiders (-20), 13 s
 Odd One Out    5 crowded grids, tap the one look-alike, faster is worth more
 ```
 
+## Duels
+
+When a mover's final landing (1 to 99, not where it started the turn) shares a square with another piece, the
+two fight a best-of-3 side-view brawl (`static/duel.js`): walk, jump, crouch, block by holding away, punch,
+kick, a fireball, and a super when the meter fills, with 25 s rounds. The loser drops back 4 squares (no
+chute or ladder), the winner gets +1 charge. A duel runs before any minigame due that turn. Host setting:
+Duels on/off (on by default).
+
+```
+CPU vs CPU      every screen plays the same fight from a shared seed; the server picks the winner (about 20 s)
+Human vs CPU    played on that human's device; online spectators watch a relay of it
+Two humans      same device: hot-seat keyboards (WASD+F/G/H vs arrows+K/L/;) or two touch pads;
+                different devices: the attacker's device runs the fight, the defender sends inputs,
+                everyone else watches frames over a long-poll relay (no WebSockets)
+```
+
+A fight that never reports back is settled by the server at its deadline (rounds won, then health, then a
+coin flip), so a dropped player cannot stall the room.
+
 ## Pieces
 
 ```
@@ -64,8 +87,10 @@ rules.py                the whole game engine (turns, abilities, boards, minigam
 sim.py                  balance simulator for rules.py
 suggest.py              suggestion box intake (screening, rate limits, status feed)
 static/index.html       the client (SVG board, animations, ability UI, minigame overlay, update pill)
-static/chars.js         79 characters: 79 embedded 96x96 WebP data URIs (nothing hotlinks)
+static/chars.js         79 characters, each an embedded 96x96 WebP data URI (nothing hotlinks)
 static/minigames/*.js   the nine minigames (d.js holds the Halloween three)
+static/duel.js          the duel fighter (canvas, AI, keyboard/touch, runner/mirror netcode)
+test_duel.py            duel server tests (roles, relay, deadlines, limits)
 test_rules.py           unit tests for rules.py and the character and minigame tables
 data/                   SQLite rooms + suggestions (gitignored)
 ```

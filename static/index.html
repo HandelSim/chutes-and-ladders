@@ -277,6 +277,11 @@ h1::after{content:" 🦇"}
 .scare .face{font-size:clamp(160px,50vw,420px);line-height:1;animation:scareZoom .9s ease-out forwards}
 @keyframes scare{0%{opacity:0}8%{opacity:1}55%{opacity:1}100%{opacity:0}}
 @keyframes scareZoom{0%{transform:scale(.3) rotate(-8deg)}15%{transform:scale(1.15) rotate(6deg)}30%{transform:scale(1) rotate(-4deg)}100%{transform:scale(1.25) rotate(2deg)}}
+.duel-ov{position:fixed;inset:0;z-index:70;background:#07050a;display:flex;flex-direction:column}
+.duel-ov .duel-root{flex:1;position:relative;min-height:0}
+.duel-ov .duel-skip{position:absolute;bottom:12px;right:12px;z-index:3;opacity:.85}
+.duel-ov .duel-note{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:3;color:#fff;background:rgba(0,0,0,.6);
+  border-radius:999px;padding:4px 12px;font-size:13px;pointer-events:none;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.scare{animation:scareSoft 1s ease-out forwards}.scare .face{animation:none;font-size:clamp(100px,30vw,240px)}@keyframes scareSoft{0%{opacity:0}20%{opacity:.85}100%{opacity:0}}}
 @media (max-width:420px){.wrap{padding:14px 10px 30px}h1{font-size:25px}#spinner{width:96px;height:96px}#picks li button:first-child{flex-basis:44%}}
 </style>
@@ -333,6 +338,7 @@ h1::after{content:" 🦇"}
             <div class="row"><input type="checkbox" id="abilitiesChk" checked><label class="lbl grow" for="abilitiesChk">Character abilities</label></div>
             <div class="row"><label class="lbl grow" for="miniSel">Minigame every</label>
               <select id="miniSel"><option value="0">Off</option><option value="2">2 rounds</option><option value="3">3 rounds</option><option value="4">4 rounds</option><option value="5">5 rounds</option></select></div>
+            <div class="row"><input type="checkbox" id="duelsChk" checked><label class="lbl grow" for="duelsChk">Duels (landing on someone starts a fight)</label></div>
           </div>
           <div class="row">
             <button id="shuffleBtn" title="Random characters for everyone">🎲 Shuffle</button>
@@ -393,6 +399,7 @@ h1::after{content:" 🦇"}
               <div class="row"><input type="checkbox" id="hAbilities"><label class="lbl grow" for="hAbilities">Character abilities</label></div>
               <div class="row"><label class="lbl grow" for="hMini">Minigame every</label>
                 <select id="hMini"><option value="0">Off</option><option value="2">2 rounds</option><option value="3">3 rounds</option><option value="4">4 rounds</option><option value="5">5 rounds</option></select></div>
+              <div class="row"><input type="checkbox" id="hDuels"><label class="lbl grow" for="hDuels">Duels (landing on someone starts a fight)</label></div>
             </div>
             <div class="interval">
               <div class="top"><label class="lbl" for="autoSpin">Auto-spin if a player waits</label><output id="autoSpinOut" for="autoSpin">off</output></div>
@@ -462,6 +469,7 @@ h1::after{content:" 🦇"}
 <script src="chars.js"></script>
 <script src="/rules.js"></script>
 <script src="/minigames.js"></script>
+<script src="/duel.js"></script>
 <script>
 (() => {
   "use strict";
@@ -908,8 +916,9 @@ h1::after{content:" 🦇"}
   }
   const pieceOf = id => pieces.find(q => q.key === id);
   async function animateEvent(ev) {
-    const actor = ev.kind === "mini" ? null : pieceOf(ev.seat);
+    const actor = ev.kind === "mini" || ev.kind === "duel" ? null : pieceOf(ev.seat);
     if (ev.kind === "mini") await showResults(ev);
+    else if (ev.kind === "duel") await showDuelResults(ev);
     else if (actor) { $("tokens").appendChild(actor.g); markCurrent(actor); setWho(actor, "Spinning…"); }
     chipsClear();
     const spins = [], chips = [];
@@ -1003,6 +1012,8 @@ h1::after{content:" 🦇"}
           setWho(p, st.do === "lucky" ? "🍀 Lucky square! Jump forward 3." : "💀 Unlucky square! Slip back 3.");
           await ringFx(p, st.do === "lucky" ? "#3fb950" : "#a371f7", 36);
         }
+      } else if (st.t === "duel") {
+        setWho(p, "⚔️ Wins the duel!");
       } else if (st.t === "wild") {
         const A = RL.ABILITIES[st.ab] || {};
         if (st.ab === "shield") p.shield = Math.max(1, p.shield);
@@ -1011,7 +1022,7 @@ h1::after{content:" 🦇"}
       } else if (st.t === "charge") {
         p.charges = st.n;
         setWho(p, st.why === "stolen" ? "A pickpocket took a charge!" : st.why === "steal" ? "Stole a charge!" :
-          `+1 charge (${st.why === "chute" ? "slid down a chute" : st.why === "boss" ? "beat the boss" : "won the minigame"}).`);
+          `+1 charge (${st.why === "chute" ? "slid down a chute" : st.why === "boss" ? "beat the boss" : st.why === "duel" ? "won the duel" : "won the minigame"}).`);
         renderRoster(st.seat);
         await ringFx(p, "var(--accent)", 24);
       }
@@ -1070,6 +1081,11 @@ h1::after{content:" 🦇"}
       const parts = (ev.results || []).map(r => { const p = pieceOf(r.seat); return `${ordinal(r.rank)} ${esc(p ? p.name : "?")}${r.moves ? ` +${r.moves}` : ""}${r.charge ? " ⚡" : ""}`; });
       return addLog("MG", null, `<b>${esc(g ? g.title : "Minigame")}</b>: ${parts.join(", ")}`, "up");
     }
+    if (ev.kind === "duel") {
+      const w = pieceOf(ev.winner), l = pieceOf(ev.loser);
+      const how = { time: " (time ran out, decided on health)", coin: " (nobody finished it, coin flip)" }[ev.how] || "";
+      return addLog("⚔️", w, `<b>won the duel</b> against ${esc(l ? l.name : "?")}${how}`, "up");
+    }
     const p = pieceOf(ev.seat);
     if (!p) return;
     const label = "T" + (ev.turn || ev.n);
@@ -1085,8 +1101,9 @@ h1::after{content:" 🦇"}
       pre += `knocked back ${plural(hit, "player")}, `;
     }
     if (ev.ab === "thief") {
-      const q = pieceOf(ev.target);
-      pre += `stole a charge from ${esc(q ? q.name : "?")}, `;
+      const ids = Array.isArray(ev.targets) && ev.targets.length ? ev.targets : ev.target != null ? [ev.target] : [];
+      const names = ids.map(id => { const q = pieceOf(id); return esc(q ? q.name : "?"); });
+      pre += names.length ? `stole a charge from ${names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names[0]}, ` : "found no one to rob, ";
     }
     const sv = stepsOf(ev).filter(s => s.t === "spin" && !s.keep).map(s => s.v);
     const rolled = ev.rolls ? `spun ${ev.rolls.join(", ")}, kept ${ev.roll}` : ev.ab === "pick" ? `picked ${ev.roll}`
@@ -1106,7 +1123,9 @@ h1::after{content:" 🦇"}
     }
     const dz = stepsOf(ev).find(s => s.t === "disaster");
     if (dz) t += ` · <b>${esc(dz.icon)} ${esc(dz.label)}!</b>`;
-    addLog(label, p, pre + t + auto + (ev.mini ? " · <b>Minigame time!</b>" : ""), cls);
+    const foe = ev.duel ? pieceOf(ev.duel.d) : null;
+    addLog(label, p, pre + t + auto + (ev.duel ? ` · <b>⚔️ Duel with ${esc(foe ? foe.name : "?")}!</b>` : "") +
+      (ev.mini ? " · <b>Minigame time!</b>" : ""), cls);
   }
   const ordinal = n => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");
   function clearConfetti() { document.querySelectorAll(".confetti").forEach(c => c.remove()); }
@@ -1237,6 +1256,7 @@ h1::after{content:" 🦇"}
     drainQueue();
     render();
     if (MG.phase === "wait") renderWait();
+    checkDuel();
   }
   function snapToState() {
     const s = G.s;
@@ -1274,6 +1294,7 @@ h1::after{content:" 🦇"}
       syncTurnMarkers();
     }
     render();
+    checkDuel();
     checkMini();
   }
   function render() { if (mode === "online") renderOnline(); else renderLocal(); renderSpinCard(); }
@@ -1282,14 +1303,14 @@ h1::after{content:" 🦇"}
   // Who may act now from this screen: local = a Human seat's turn, online = my own seat's turn.
   function actingSeat() {
     const s = G.s, cur = curSeat();
-    if (!s || !cur || cur.cpu || s.mini) return null;
+    if (!s || !cur || cur.cpu || s.mini || s.duel || DU.h) return null;
     if (mode === "local" ? !G.solo : !cur.mine) return null;
     return cur;
   }
   let pickOpen = false;
   function renderSpinCard() {
     const seat = actingSeat(), s = G.s;
-    const busy = busyAnim() || MG.busy || Lc.busy || G.sending;
+    const busy = busyAnim() || MG.busy || Lc.busy || G.sending || !!DU.h;
     const ready = s && (s.solo || serverNow() >= (s.readyAt || 0) - 0.3);
     $("spinActs").hidden = !seat;
     if (!seat) { pickOpen = false; $("pickRow").hidden = true; return; }
@@ -1351,7 +1372,7 @@ h1::after{content:" 🦇"}
   const gameOf = id => GAMES.find(g => g.id === id) || null;
   function checkMini() {
     const s = G.s;
-    if (!s || !s.mini || MG.busy || busyAnim()) return;
+    if (!s || !s.mini || MG.busy || busyAnim() || s.duel || DU.h) return;
     const k = miniKey(s.mini);
     if (k === MG.key) return;
     MG.key = k;
@@ -1526,6 +1547,195 @@ h1::after{content:" 🦇"}
     closeModal("mg");
   }
 
+  // ================= Duels =================
+  // s.duel is live while two pieces fight (see duel.js). Exactly one device runs the fight:
+  //   show   CPU vs CPU: every screen plays the same AI fight from the seed, ending with s.duel.winner.
+  //   runner this device holds the fight's humans (or the attacker in a net duel): simulates, posts duelend,
+  //          streams snapshots (online) and reads the remote player's inputs from the relay long poll.
+  //   remote the defender's device in a net duel: renders the runner's snapshots, sends its inputs.
+  //   watch  everyone else: renders the runner's snapshots.
+  const DU = { key: null, h: null, ov: null, token: 0, ac: null, reload: false, fseq: 0, iseq: 0, fBusy: false, fNext: null, iBusy: false, iNext: null, wait: 0 };
+  const duelKey = d => `${d.id}|${d.seed}|${d.startAt}`;
+  const TOUCH = matchMedia("(pointer: coarse)").matches;
+  const SOUND = !REDUCED;                         // same rule as the jumpscare's synth sound
+  function duelSeat(s, id) {
+    const seat = s.seats.find(x => x.id === id) || {}, p = pieceOf(id), ch = charOf(seat.char);
+    return { name: p ? p.name : seat.name || ch.name, img: p ? p.img : ch.img, color: seat.color || (p && p.color) || "#888",
+      cpu: !!seat.cpu, mine: !seat.cpu && (s.solo || !!seat.mine) };
+  }
+  function checkDuel() {
+    const s = G.s, d = s && s.duel;
+    if (DU.key && (!d || duelKey(d) !== DU.key)) stopDuel();
+    if (!d || DU.key || busyAnim() || MG.busy || s.status !== "playing") return;
+    const wait = (d.startAt || 0) - serverNow();   // the fight opens on the server's clock, after the landing
+    if (wait > 0) { clearTimeout(DU.wait); DU.wait = setTimeout(checkDuel, Math.min(5000, wait * 1000 + 50)); return; }
+    startDuel(s, d);
+  }
+  function stopDuel() {
+    const had = !!DU.key;
+    DU.token++; DU.key = null; clearTimeout(DU.wait);
+    if (DU.ac) { try { DU.ac.abort(); } catch {} DU.ac = null; }
+    if (DU.h) { try { DU.h.destroy(); } catch {} DU.h = null; }
+    if (DU.ov) { DU.ov.remove(); DU.ov = null; }
+    if (had && DU.reload && !(G.s && G.s.duel)) setTimeout(() => location.reload(), 4500);   // after the results card
+    if (had) render();
+  }
+  function duelOverlay(label) {
+    const ov = h("div", { class: "duel-ov", role: "dialog", "aria-modal": "true", "aria-label": label });
+    const root = h("div", { class: "duel-root" });
+    ov.appendChild(root);
+    document.body.appendChild(ov);
+    DU.ov = ov;
+    return root;
+  }
+  function duelNote(text) {
+    if (!DU.ov) return;
+    let n = DU.ov.querySelector(".duel-note");
+    if (!n) { n = h("div", { class: "duel-note", "aria-live": "polite" }); DU.ov.appendChild(n); }
+    n.textContent = text;
+  }
+  function startDuel(s, d) {
+    const k = duelKey(d), tok = ++DU.token, code = G.code;
+    DU.key = k; DU.fBusy = DU.iBusy = false; DU.fNext = DU.iNext = null;
+    DU.fseq = DU.iseq = (Date.now() / 50 | 0) & 0x3fffffff;   // keeps rising across a reload
+    const A = duelSeat(s, d.a), D = duelSeat(s, d.d);
+    const role = d.mode === "show" ? "show" : d.runner ? "runner" : d.remote ? "remote" : "watch";
+    setWho(null, `⚔️ Duel: ${A.name} vs ${D.name}! Duel in progress…`);
+    if (role === "show" && !s.solo && d.startAt + (RL.DUEL_SHOW || 20) - serverNow() < 6) return;   // nearly over: just wait
+    if (!window.Duel) {                            // the fighter failed to load: let the server decide
+      if (role === "runner" || (role === "show" && s.solo)) postDuelEnd(tok, d, Math.random() < .5 ? 1 : 2, null);
+      return;
+    }
+    const nLocal = [A, D].filter(x => x.mine).length;
+    const localCtl = i => nLocal > 1 ? (TOUCH ? "touch" : "kb") + (i + 1) : TOUCH ? "touchAny" : "kbAny";
+    const ctl = (x, i) => role === "show" ? "ai" : role === "runner" ? (x.cpu ? "ai" : x.mine ? localCtl(i) : "remote")
+      : role === "remote" && x.mine ? localCtl(i) : "mirror";
+    const control = { p1: ctl(A, 0), p2: ctl(D, 1) };
+    const root = duelOverlay(`Duel: ${A.name} versus ${D.name}`);
+    if (role === "show") {
+      const skip = h("button", { class: "duel-skip", text: s.solo ? "Skip fight" : "Hide fight", "aria-label": s.solo ? "Skip the fight" : "Hide the fight" });
+      skip.onclick = () => {
+        if (tok !== DU.token) return;
+        if (s.solo) { postDuelEnd(tok, d, d.winner === "a" ? 1 : 2, null); skip.disabled = true; return; }
+        if (DU.h) { try { DU.h.destroy(); } catch {} DU.h = null; }   // online: the server ends it on time
+        if (DU.ov) { DU.ov.remove(); DU.ov = null; }
+        render();
+      };
+      DU.ov.appendChild(skip);
+    }
+    const online = !s.solo;
+    try {
+      DU.h = Duel.start({
+        root, p1: { name: A.name, img: A.img, color: A.color }, p2: { name: D.name, img: D.img, color: D.color },
+        control, seed: d.seed, forcedWinner: role === "show" ? (d.winner === "a" ? 1 : 2) : null,
+        // online shows end on the server's clock: a late start (slow animation, reload) plays a little faster
+        timeScale: role === "show" && online ? Math.min(2, Math.max(1, 19 / Math.max(1, d.startAt + (RL.DUEL_SHOW || 20) - serverNow()))) : 1,
+        // no user gesture yet (e.g. a reload mid-fight): stay silent rather than trip the autoplay block
+        reducedMotion: REDUCED, sound: SOUND && (!navigator.userActivation || navigator.userActivation.hasBeenActive),
+        onFrame: role === "runner" && online ? f => sendFrame(tok, code, d.id, f) : null,
+        onInput: role === "remote" ? bits => sendInput(tok, code, d.id, bits) : null,
+        onEnd: r => {
+          if (tok !== DU.token) return;
+          if (role === "runner" || (role === "show" && s.solo)) postDuelEnd(tok, d, r && r.winner, r && r.wins);
+          else duelNote("Waiting for the result…");
+        }
+      });
+    } catch (e) {
+      console.warn("Duel failed to start", e);
+      if (DU.ov) { DU.ov.remove(); DU.ov = null; }
+      if (role === "runner" || (role === "show" && s.solo)) postDuelEnd(tok, d, Math.random() < .5 ? 1 : 2, null);
+      return;
+    }
+    if (role === "runner" && d.mode === "net") relayLoop(tok, code, d.id, "input");
+    if (role === "remote" || role === "watch") relayLoop(tok, code, d.id, "frame");
+    render();
+  }
+  async function postDuelEnd(tok, d, w, wins) {
+    const body = { id: d.id, winner: w === 2 ? "d" : "a" };
+    if (Array.isArray(wins) && wins.length === 2) body.rw = wins;
+    let tries = 0;
+    for (let i = 0; i < 4 && tok === DU.token; i++) {
+      try { handleState(await api("POST", `/api/rooms/${G.code}/duelend`, body)); return; }
+      catch (e) {
+        // the server refuses an end within ~6 s of startAt ("That fight just started."): wait and retry
+        if (e.status === 409 && /just started/i.test(e.message || "") && tries++ < 20) { i--; await sleep(1000); continue; }
+        if (e.status && e.status < 500) { refresh(); return; }   // already over / not ours: the room knows best
+        await sleep(800);
+      }
+    }
+    refresh();
+  }
+  // Relay posts: at most one in flight per kind; a newer frame/input replaces a waiting one.
+  async function relayPost(kind, tok, code, body) {
+    const b = kind === "duelframe" ? "f" : "i";
+    if (DU[b + "Busy"]) { DU[b + "Next"] = body; return; }
+    DU[b + "Busy"] = true;
+    try {
+      while (body && tok === DU.token && G.code === code) {
+        DU[b + "Next"] = null;
+        let r = null;
+        try { r = await api("POST", `/api/rooms/${code}/${kind}`, body); } catch { await sleep(250); }
+        if (r && r.over && tok === DU.token) { refresh(); break; }
+        body = DU[b + "Next"];
+      }
+    } finally { if (tok === DU.token) DU[b + "Busy"] = false; }
+  }
+  function sendFrame(tok, code, id, f) {
+    if (tok !== DU.token || !f) return;
+    const hp = Array.isArray(f.a) && Array.isArray(f.b) ? [Math.max(0, f.a[7] | 0), Math.max(0, f.b[7] | 0)] : undefined;
+    relayPost("duelframe", tok, code, { id, seq: ++DU.fseq, f, hp, rw: Array.isArray(f.w) ? f.w : undefined });
+  }
+  function sendInput(tok, code, id, bits) {
+    if (tok !== DU.token) return;
+    relayPost("duelin", tok, code, { id, seq: ++DU.iseq, k: (bits | 0) & 4095 });
+  }
+  // Long poll GET /api/rooms/CODE/duel: frames for mirrors, inputs for the runner. Ends with the duel.
+  async function relayLoop(tok, code, id, want) {
+    const ac = new AbortController();
+    if (DU.ac) try { DU.ac.abort(); } catch {}
+    DU.ac = ac;
+    let after = -1, lastF = null, lastI = null, fails = 0;
+    while (tok === DU.token && G.code === code) {
+      let r = null, st = 0;
+      try {
+        const res = await fetch(`/api/rooms/${code}/duel?id=${encodeURIComponent(id)}&after=${after}&want=${want}`,
+          { headers: { "X-Client-Id": clientId }, cache: "no-store", signal: ac.signal });
+        st = res.status;
+        r = res.ok ? await res.json() : null;
+      } catch { if (ac.signal.aborted) return; }
+      if (tok !== DU.token || ac.signal.aborted) return;
+      if (st === 404) { refresh(); return; }
+      if (!r) { await sleep(Math.min(3000, 400 * ++fails)); continue; }
+      fails = 0;
+      if (r.over) {                               // the duel ended (or restarted): the room state decides
+        await refresh();
+        if (tok !== DU.token) return;
+        await sleep(600);
+        continue;
+      }
+      if (typeof r.seq === "number") after = r.seq;
+      if (DU.h && want === "frame" && r.frame && r.frameSeq !== lastF) { lastF = r.frameSeq; DU.h.pushFrame(r.frame); }
+      if (DU.h && want === "input" && r.input != null && r.inputSeq !== lastI) { lastI = r.inputSeq; DU.h.remoteInput(r.input); }
+      if (r.busy) await sleep(350);
+    }
+  }
+  async function showDuelResults(ev) {
+    const w = pieceOf(ev.winner), l = pieceOf(ev.loser), wn = w ? w.name : "?", ln = l ? l.name : "?";
+    $("mgIcon").textContent = "⚔️";
+    $("mgTitle").textContent = "Duel";
+    $("mgClock").textContent = "";
+    openModal("mg");
+    const how = { time: "Time ran out, so health decided it.", coin: "Nobody finished the fight, so a coin flip decided it." }[ev.how];
+    const pa = pieceOf(ev.a), pd = pieceOf(ev.d);
+    const rounds = Array.isArray(ev.rounds) && ev.rounds.length === 2 && pa && pd ? `Rounds won: ${pa.name} ${ev.rounds[0]}, ${pd.name} ${ev.rounds[1]}.` : "";
+    mgBody(h("p", { class: "mg-lead" }, w ? avEl(w.img, w.color, 28) : null, ` ${wn} wins the duel!`),
+      h("p", { class: "mg-howto", text: `${ln} is knocked back ${RL.DUEL_KNOCK || 4} squares.` +
+        (showPips ? ` ${wn} gets +${RL.DUEL_CHARGE || 1} charge.` : "") }),
+      how || rounds ? h("p", { class: "hint", text: [rounds, how].filter(Boolean).join(" ") }) : null);
+    await readyButton("Continue", 3000);
+    closeModal("mg");
+  }
+
   // ================= LOCAL MODE (one screen, backed by a server solo room) =================
   const Lc = { playing: false, busy: false, loopId: 0, preview: null, classic: store.get("cl.boardMode", "random") === "classic" };
   let picks = [];
@@ -1591,10 +1801,11 @@ h1::after{content:" 🦇"}
     renderPicks();
     if (mode === "local" && !localLive()) localIdle(true);
   }
-  const localSettings = () => ({ abilities: $("abilitiesChk").checked, miniEvery: +$("miniSel").value });
+  const localSettings = () => ({ abilities: $("abilitiesChk").checked, miniEvery: +$("miniSel").value, duels: $("duelsChk").checked });
   // Setup state: preview board, pieces at start, nothing sent to the server yet.
   function localIdle(keepBoard) {
     Lc.loopId++; Lc.playing = false; Lc.setup = true;
+    stopDuel();
     G.s = null; G.game = null; G.queue = []; G.code = null; G.solo = false;
     const n = nPlayers();
     showPips = $("abilitiesChk").checked;
@@ -1623,15 +1834,16 @@ h1::after{content:" 🦇"}
     $("boardInfo").textContent = live ? boardLabel(s.board) : boardLabel(Lc.preview);
     $("rerollBtn").disabled = live; $("classicBtn").disabled = live;
     $("boardRow").hidden = live;
-    $("abilitiesChk").disabled = live; $("miniSel").disabled = live;
+    $("abilitiesChk").disabled = live; $("miniSel").disabled = live; $("duelsChk").disabled = live;
     $("classicBtn").setAttribute("aria-pressed", String(Lc.classic));
     $("classicBtn").textContent = Lc.classic ? "Random board" : "Classic board";
     $("startBtn").textContent = live ? "New game" : "Start game";
     const over = live && s.status === "over";
     $("playBtn").disabled = !live || over;
     $("playBtn").textContent = Lc.playing ? "⏸ Pause" : "▶ Play";
-    $("stepBtn").disabled = !live || over || Lc.playing || Lc.busy || busyAnim() || MG.busy || !!(s && s.mini);
-    if (live && !busyAnim() && !Lc.busy && s.status === "playing" && !s.mini) {
+    $("stepBtn").disabled = !live || over || Lc.playing || Lc.busy || busyAnim() || MG.busy || !!(s && (s.mini || s.duel)) || !!DU.h;
+    if (live && !busyAnim() && !Lc.busy && s.status === "playing" && s.duel) setWho(null, "Duel in progress…");
+    else if (live && !busyAnim() && !Lc.busy && s.status === "playing" && !s.mini) {
       const cur = curSeat(), p = pieces[s.current];
       if (p) setWho(p, cur.cpu ? (Lc.playing ? "Computer is up next." : `Up next on ${p.pos || "start"}. Press Play or Step.`)
         : `Your turn, ${p.name}! Spin${s.abilities ? " or use your ability" : ""}.`);
@@ -1677,7 +1889,7 @@ h1::after{content:" 🦇"}
     while (Lc.playing && id === Lc.loopId && localLive()) {
       const s = G.s;
       if (s.status !== "playing") break;
-      if (s.mini || MG.busy) { await sleep(150); continue; }
+      if (s.mini || MG.busy || s.duel || DU.h) { await sleep(150); continue; }
       if (!curSeat().cpu) { render(); return; }    // a person's turn: wait for their Spin
       await localStep();
       if (!Lc.playing || id !== Lc.loopId) break;
@@ -1691,7 +1903,7 @@ h1::after{content:" 🦇"}
   }
   function localKick() { if (Lc.playing && localLive()) autoLoop(++Lc.loopId); }
   async function localStep() {
-    if (!localLive() || Lc.busy || G.s.status !== "playing" || G.s.mini) return;
+    if (!localLive() || Lc.busy || G.s.status !== "playing" || G.s.mini || G.s.duel || DU.h) return;
     Lc.busy = true; render();
     try { handleState(await api("POST", `/api/rooms/${G.code}/spin`, { expect: G.s.seq ?? G.s.turn })); }
     catch (e) { showErr("localErr", e.message); if (e.status === 404) { Lc.playing = false; localIdle(); } else if (e.status === 409) await refresh(); }
@@ -1722,10 +1934,10 @@ h1::after{content:" 🦇"}
       v.seats.forEach((x, i) => { picks[i] = x.char; names[i] = x.name || ""; cpus[i] = !!x.cpu; });
       fillPicks();
       store.set("cl.names", JSON.stringify(names)); store.set("cl.cpu", JSON.stringify(cpus.slice(0, 6)));
-      $("abilitiesChk").checked = !!v.abilities; $("miniSel").value = String(v.miniEvery);
+      $("abilitiesChk").checked = !!v.abilities; $("miniSel").value = String(v.miniEvery); $("duelsChk").checked = v.duels !== false;
       renderPicks();
       enterSolo(v);
-      setWho(v.mini ? null : pieces[v.current], v.mini ? "Game resumed. Minigame time!" : "Game resumed. Press Play or Step.");
+      if (!v.duel) setWho(v.mini ? null : pieces[v.current], v.mini ? "Game resumed. Minigame time!" : "Game resumed. Press Play or Step.");
       return true;
     } catch { return false; }
   }
@@ -1758,6 +1970,7 @@ h1::after{content:" 🦇"}
   }
   function leaveRoom() {
     G.pollToken++; G.code = null; G.s = null; G.game = null; G.queue = [];
+    stopDuel();
     if (MG.abort) MG.abort.abort();
     history.replaceState(null, "", location.pathname);
     $("lobbyCard").hidden = false; $("roomCard").hidden = true;
@@ -1796,7 +2009,7 @@ h1::after{content:" 🦇"}
     const cur = curSeat();
     const mineCount = s.seats.filter(x => x.mine).length;
     const busy = busyAnim();
-    const ready = !busy && serverNow() >= s.readyAt - 0.3 && !s.mini;
+    const ready = !busy && serverNow() >= s.readyAt - 0.3 && !s.mini && !s.duel && !DU.h;
     const preGame = s.status !== "playing";
 
     // seats: rebuilt only when something visible changed, and never while you are typing a name
@@ -1860,8 +2073,9 @@ h1::after{content:" 🦇"}
     $("hClassic").setAttribute("aria-pressed", String(s.board && s.board.kind === "classic"));
     if (document.activeElement !== $("hAbilities")) $("hAbilities").checked = !!s.abilities;
     if (document.activeElement !== $("hMini")) $("hMini").value = String(s.miniEvery);
+    if (document.activeElement !== $("hDuels")) $("hDuels").checked = s.duels !== false;
     $("roomRules").textContent = `${boardLabel(s.board)} Abilities ${s.abilities ? "on" : "off"}. ` +
-      (s.miniEvery ? `Minigame every ${s.miniEvery} rounds.` : "No minigames.");
+      (s.miniEvery ? `Minigame every ${s.miniEvery} rounds.` : "No minigames.") + (s.duels === false ? " No duels." : " Duels on.");
 
     let status;
     if (s.status === "lobby") status = s.isHost ? "Send the link, wait for everyone to pick a character, then Start." : "Waiting for the host to start the game.";
@@ -1871,6 +2085,7 @@ h1::after{content:" 🦇"}
 
     if (busy) return;                             // the animation owns the turn text while it runs
     if (s.status === "lobby") setWho(null, s.seats.length ? `${s.seats.length} player${s.seats.length > 1 ? "s" : ""} in the room.` : "Waiting for players.");
+    else if (s.duel) setWho(null, "Duel in progress…");
     else if (cur && !s.mini) {
       const p = pieces[s.current];
       if (!p) return;
@@ -1957,6 +2172,7 @@ h1::after{content:" 🦇"}
     hideBanner();
     $("log").innerHTML = "";
     Lc.loopId++; Lc.playing = false;
+    stopDuel();
     if (MG.abort) MG.abort.abort();
     if (m === "local") {
       if (G.code && !G.solo) leaveRoom();
@@ -1980,6 +2196,7 @@ h1::after{content:" 🦇"}
   $("interval").value = Math.min(5, Math.max(0, parseFloat(store.get("cl.interval", 1)) || 0));
   $("abilitiesChk").checked = store.get("cl.abilities", "1") === "1";
   $("miniSel").value = ["0", "2", "3", "4", "5"].includes(store.get("cl.mini", "3")) ? store.get("cl.mini", "3") : "3";
+  $("duelsChk").checked = store.get("cl.duels", "1") === "1";
   syncInterval();
   $("interval").addEventListener("input", syncInterval);
   const setPlayers = v => {
@@ -2003,6 +2220,7 @@ h1::after{content:" 🦇"}
   };
   $("abilitiesChk").onchange = () => { store.set("cl.abilities", $("abilitiesChk").checked ? "1" : "0"); if (!localLive()) { showPips = $("abilitiesChk").checked; renderRoster(); } };
   $("miniSel").onchange = () => store.set("cl.mini", $("miniSel").value);
+  $("duelsChk").onchange = () => store.set("cl.duels", $("duelsChk").checked ? "1" : "0");
   $("againBtn").onclick = () => { hideBanner(); if (mode === "local") playAgain(); else roomAction("start"); };
   $("closeBanner").onclick = hideBanner;
   $("pickerClose").onclick = closePicker;
@@ -2033,6 +2251,7 @@ h1::after{content:" 🦇"}
   $("hClassic").onclick = () => roomAction("board", { mode: "classic" });
   $("hAbilities").onchange = () => roomAction("settings", { abilities: $("hAbilities").checked });
   $("hMini").onchange = () => roomAction("settings", { miniEvery: +$("hMini").value });
+  $("hDuels").onchange = () => roomAction("settings", { duels: $("hDuels").checked });
   $("autoSpin").addEventListener("input", syncAutoSpinOut);
   $("autoSpin").addEventListener("change", () => roomAction("settings", { autoSpin: +$("autoSpin").value }));
   $("leaveRoom").onclick = () => setMode("local");
@@ -2042,13 +2261,21 @@ h1::after{content:" 🦇"}
     catch { prompt("Copy this link:", url); }
     setTimeout(() => { $("copyLink").textContent = "Copy link"; }, 1600);
   };
-  $("updPill").onclick = () => location.reload();
+  $("updPill").onclick = () => {
+    if (G.s && G.s.duel || DU.h) {               // never reload in the middle of a fight
+      DU.reload = true;
+      $("updPill").textContent = "Updating after the duel…";
+      return;
+    }
+    location.reload();
+  };
   $("suggestBtn").onclick = openSuggest;
   $("sgClose").onclick = () => closeModal("sg");
   $("sg").addEventListener("click", e => { if (e.target === $("sg")) closeModal("sg"); });
   $("sgText").addEventListener("input", syncSgCount);
   $("sgSend").onclick = sendSuggestion;
   document.addEventListener("keydown", e => {
+    if (DU.ov) return;                            // the duel owns the keyboard
     if (!$("picker").hidden) { if (e.key === "Escape") closePicker(); return; }
     if (!$("sg").hidden) { if (e.key === "Escape") closeModal("sg"); return; }
     if (!$("mg").hidden) return;                  // the minigame owns the keyboard

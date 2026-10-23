@@ -13,6 +13,7 @@ Steps (client animates them in order):
   {"t":"bounce","seat"}                    overshot 100, stays put
   {"t":"swap","a","b","apos","bpos"}       a and b trade squares (positions after the swap)
   {"t":"charge","seat","n","why"}          seat now holds n ability charges
+  {"t":"duel","seat","winner","loser","how"}  duel result banner (seat = winner)
 """
 import random
 
@@ -29,6 +30,7 @@ RNG = random.SystemRandom()          # sim.py swaps in a seeded random.Random
 # archetype wins about the same share of games.
 START_CHARGES = 1
 MAX_CHARGES = 2
+THIEF_ROBS = 2          # rivals a Pickpocket robs per use
 QUAKE_BACK = 10         # squares a quake knocks back each player ahead of you
 QUAKE_AHEAD = 1         # 1 = quake only hits players ahead of you
 QUAKE_RESOLVE = 0       # 1 = a knocked-back player also takes the chute/ladder they land on
@@ -47,7 +49,7 @@ ABILITIES = {
     "swap":   {"label": "Swap", "icon": "🔄", "desc": f"Trade places with the nearest player ahead (up to {SWAP_RANGE} squares), instead of spinning."},
     "quake":  {"label": "Quake", "icon": "💥", "desc": f"Everyone ahead of you drops back up to {QUAKE_BACK} squares, never behind you. Then you spin."},
     "turbo":  {"label": "Rocket Boots", "icon": "🚀", "desc": f"Spin once and move {TURBO_BONUS} extra squares."},
-    "thief":  {"label": "Pickpocket", "icon": "🦝", "desc": "Steal an ability charge from a rival who has one. Then spin."},
+    "thief":  {"label": "Pickpocket", "icon": "🦝", "desc": "Steal a charge from each of the two richest rivals. Then spin."},
     "wild":   {"label": "Wild Card", "icon": "🎲", "desc": "Fate picks one of the other abilities at random and plays it for you."},
 }
 CHAR_AB = {
@@ -107,9 +109,9 @@ def thief_targets(room, seat):
     return [s for s in room["seats"] if s is not seat and s.get("charges", 0) > 0]
 
 
-def thief_target(room, seat):
+def thief_target(room, seat, skip=()):
     """The rival a Pickpocket robs: most charges, then furthest ahead."""
-    return max(thief_targets(room, seat), key=lambda s: (s["charges"], s["pos"]))
+    return max((s for s in thief_targets(room, seat) if s["id"] not in skip), key=lambda s: (s["charges"], s["pos"]))
 
 
 def wild_kind(room, seat):
@@ -438,12 +440,17 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
     if wild:
         steps.append({"t": "wild", "seat": seat["id"], "ab": kind})
     if use and kind == "thief":
-        victim = thief_target(room, seat)
-        victim["charges"] -= 1
-        seat["charges"] = min(MAX_CHARGES, seat["charges"] + 1)
-        steps.append({"t": "charge", "seat": victim["id"], "n": victim["charges"], "why": "stolen"})
-        steps.append({"t": "charge", "seat": seat["id"], "n": seat["charges"], "why": "steal"})
-        ev["target"] = victim["id"]
+        ev["targets"] = []
+        for _ in range(THIEF_ROBS):                     # duels hand out charges; robbing 2 keeps it in band
+            if not [s for s in thief_targets(room, seat) if s["id"] not in ev["targets"]]:
+                break
+            victim = thief_target(room, seat, ev["targets"])
+            victim["charges"] -= 1
+            seat["charges"] = min(MAX_CHARGES, seat["charges"] + 1)
+            steps.append({"t": "charge", "seat": victim["id"], "n": victim["charges"], "why": "stolen"})
+            steps.append({"t": "charge", "seat": seat["id"], "n": seat["charges"], "why": "steal"})
+            ev["targets"].append(victim["id"])
+        ev["target"] = ev["targets"][0]
     if use and kind == "swap":
         t = ahead_of(room, seat)
         seat["pos"], t["pos"] = t["pos"], seat["pos"]
@@ -508,6 +515,7 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
         room["status"] = "over"
         room["winner"] = seat["id"]
         return ev
+    foe = duel_foe(room, seat, ev["from"])         # only the mover's own landing starts a duel
     room["current"] = (room["current"] + 1) % len(room["seats"])
     if room["current"] == 0:
         room["round"] = room.get("round", 0) + 1
@@ -516,6 +524,52 @@ def take_turn(room, use=False, pick=None, auto=False, cpu=False):
             ev["mini"] = True                       # caller starts the minigame
         if maybe_disaster(room, seat, steps):
             ev["to"] = seat["pos"]
+    if foe and foe["pos"] == seat["pos"]:           # a disaster can split them up
+        ev["duel"] = {"a": seat["id"], "d": foe["id"]}   # caller runs the duel (before any minigame)
+    return ev
+
+
+# ---------- duels ----------
+# Ending your turn on a square another player stands on starts a duel (a fighting game
+# the clients run; CPU seats fight AI vs AI). Only the mover's own landing counts, and
+# only if the mover actually moved this turn (a boss attack or bounce is not a landing).
+# The loser is knocked back DUEL_KNOCK squares (no chute or ladder where they land),
+# the winner earns DUEL_CHARGE charges. Room option "duels" (default on).
+DUEL_KNOCK = 4
+DUEL_CHARGE = 1
+DUEL_SHOW = 20          # seconds an online CPU-vs-CPU show fight runs before the server resolves it
+DUEL_MAX = 90           # seconds a fought online duel may take (plus DUEL_GRACE) before the server calls it
+DUEL_GRACE = 8
+
+
+def duel_foe(room, seat, start):
+    """The seat the mover must fight, or None. RNG picks if several share the square."""
+    p = seat["pos"]
+    if not room.get("duels", True) or not 0 < p < 100 or p == start:
+        return None
+    foes = [s for s in room["seats"] if s is not seat and s["pos"] == p]
+    return RNG.choice(foes) if foes else None
+
+
+def duel_cpu_winner(room, a, d):
+    """Winner id of a computer-decided duel: a coin flip."""
+    return a if RNG.random() < 0.5 else d
+
+
+def resolve_duel(room, winner_id, loser_id, how):
+    """Pay out a finished duel. how: "fight" | "show" | "time" | "coin". Returns the event."""
+    w = next(s for s in room["seats"] if s["id"] == winner_id)
+    l = next(s for s in room["seats"] if s["id"] == loser_id)
+    room["seq"] = room.get("seq", room["turn"]) + 1
+    steps = [{"t": "duel", "seat": w["id"], "winner": w["id"], "loser": l["id"], "how": how}]
+    ev = {"n": room["seq"], "kind": "duel", "turn": room["turn"], "winner": w["id"], "loser": l["id"],
+          "how": how, "steps": steps}
+    to = max(0, l["pos"] - DUEL_KNOCK)              # like a quake knock: no chute/ladder, may go back to start
+    if to != l["pos"]:
+        steps.append({"t": "move", "seat": l["id"], "from": l["pos"], "to": to})
+        l["pos"] = to
+    for _ in range(DUEL_CHARGE):
+        gain_charge(room, w, steps, "duel")
     return ev
 
 

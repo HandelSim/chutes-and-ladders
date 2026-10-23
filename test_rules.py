@@ -1,4 +1,4 @@
-"""Tests for rules.py: characters, abilities, jumpscare squares, minigame table.
+"""Tests for rules.py: characters, abilities, jumpscare squares, duels, minigame table.
 Run: python3 -m unittest -v test_rules"""
 import random
 import re
@@ -20,6 +20,9 @@ class Fixed:
 
     def random(self):
         return 0.99
+
+    def choice(self, xs):
+        return xs[0]
 
 
 def make_room(chars, positions, charges=1, specials=None):
@@ -87,6 +90,15 @@ class TestAbilities(WithRng):
         self.assertEqual(room["seats"][1]["charges"], 1)
         self.assertEqual(ev["target"], "1")
 
+    def test_thief_robs_two_rivals_once_each(self):
+        room = make_room(["sock", "mario", "luigi"], [5, 5, 5])
+        room["seats"][0]["charges"] = 1
+        room["seats"][1]["charges"] = 2
+        room["seats"][2]["charges"] = 1
+        ev = rules.take_turn(room, use=True)
+        self.assertEqual(ev["targets"], ["1", "2"])
+        self.assertEqual([s["charges"] for s in room["seats"]], [2, 1, 0])
+
     def test_thief_needs_a_victim(self):
         room = make_room(["sock", "mario"], [5, 5])
         room["seats"][1]["charges"] = 0
@@ -138,6 +150,107 @@ class TestJumpscare(WithRng):
         self.assertEqual(rules.special_at(room, 3), "lucky")
         self.assertEqual(rules.special_at(room, 5), "unlucky")
         self.assertIsNone(rules.special_at(room, 6))
+
+
+class TestDuels(WithRng):
+    def test_landing_on_a_rival_starts_a_duel(self):
+        rules.RNG = Fixed(3)
+        room = make_room(["mario", "luigi"], [10, 13])           # 13: no chute, ladder or special
+        ev = rules.take_turn(room)
+        self.assertEqual(ev["duel"], {"a": "0", "d": "1"})
+        self.assertEqual([s["pos"] for s in room["seats"]], [13, 13])   # take_turn does not resolve it
+
+    def test_no_duel_when_off_at_start_or_on_a_win(self):
+        rules.RNG = Fixed(3)
+        room = make_room(["mario", "luigi"], [10, 13])
+        room["duels"] = False
+        self.assertNotIn("duel", rules.take_turn(room))
+        room = make_room(["mario", "luigi"], [97, 100])
+        ev = rules.take_turn(room)
+        self.assertNotIn("duel", ev)
+        self.assertEqual(room["winner"], "0")
+        room = make_room(["mario", "luigi"], [0, 0])
+        self.assertIsNone(rules.duel_foe(room, room["seats"][0], 5))
+
+    def test_no_duel_without_moving(self):
+        rules.RNG = Fixed(3)
+        room = make_room(["mario", "luigi"], [99, 99])           # overshoot: bounce, stays put
+        ev = rules.take_turn(room)
+        self.assertEqual(ev["via"], "bounce")
+        self.assertNotIn("duel", ev)
+
+    def test_chute_landing_counts_where_you_end(self):
+        rules.RNG = Fixed(3)
+        room = make_room(["mario", "luigi"], [13, 6])            # 16 is a chute down to 6
+        ev = rules.take_turn(room)
+        self.assertEqual(ev["duel"], {"a": "0", "d": "1"})
+
+    def test_several_on_the_square_picks_one(self):
+        seen = set()
+        for seed in range(40):
+            rules.RNG = random.Random(seed)
+            room = make_room(["mario", "luigi", "peach"], [13, 13, 13])
+            room["seats"][0]["pos"] = 10
+            rules.RNG.randint = lambda a, b: 3
+            ev = rules.take_turn(room)
+            self.assertEqual(ev["duel"]["a"], "0")
+            seen.add(ev["duel"]["d"])
+        self.assertEqual(seen, {"1", "2"})
+
+    def test_loser_knocked_back_without_chutes(self):
+        room = make_room(["mario", "luigi"], [20, 20])           # 20 - 4 = 16, a chute: not taken
+        room["seq"] = 5
+        ev = rules.resolve_duel(room, "0", "1", "fight")
+        self.assertEqual((ev["kind"], ev["winner"], ev["loser"], ev["how"], ev["n"]), ("duel", "0", "1", "fight", 6))
+        self.assertEqual(room["seats"][1]["pos"], 20 - rules.DUEL_KNOCK)
+        self.assertIn({"t": "move", "seat": "1", "from": 20, "to": 16}, ev["steps"])
+        self.assertEqual(ev["steps"][0]["t"], "duel")
+
+    def test_knockback_floor_is_start(self):
+        room = make_room(["mario", "luigi"], [3, 3])
+        rules.resolve_duel(room, "1", "0", "show")
+        self.assertEqual(room["seats"][0]["pos"], 0)
+
+    def test_winner_charge_and_cap(self):
+        room = make_room(["mario", "luigi"], [30, 30], charges=0)
+        ev = rules.resolve_duel(room, "0", "1", "fight")
+        self.assertEqual(room["seats"][0]["charges"], rules.DUEL_CHARGE)
+        self.assertIn({"t": "charge", "seat": "0", "n": 1, "why": "duel"}, ev["steps"])
+        room = make_room(["mario", "luigi"], [30, 30], charges=rules.MAX_CHARGES)
+        ev = rules.resolve_duel(room, "0", "1", "fight")
+        self.assertEqual(room["seats"][0]["charges"], rules.MAX_CHARGES)
+        self.assertFalse([s for s in ev["steps"] if s["t"] == "charge"])
+        room = make_room(["mario", "luigi"], [30, 30], charges=0)
+        room["abilities"] = False
+        rules.resolve_duel(room, "0", "1", "fight")
+        self.assertEqual(room["seats"][0]["charges"], 0)
+
+    def test_duel_and_minigame_on_one_turn(self):
+        rules.RNG = Fixed(3)
+        room = make_room(["mario", "luigi"], [10, 13])
+        room["current"], room["miniEvery"] = 1, 1                # luigi's move ends the round
+        room["seats"][1]["pos"] = 7
+        ev = rules.take_turn(room)
+        self.assertTrue(ev["mini"])
+        self.assertEqual(ev["duel"], {"a": "1", "d": "0"})
+
+    def test_cpu_winner_is_a_coin_flip(self):
+        wins = sum(rules.duel_cpu_winner({}, "a", "d") == "a" for _ in range(4000))
+        self.assertTrue(1800 < wins < 2200, wins)
+
+    def test_sim_with_duels_stays_balanced(self):
+        import sim
+        rng = random.Random(3)
+        seats, wins, duels = {}, {}, 0
+        for _ in range(1500):
+            kinds, win, _, _, _, du = sim.play(4, 3, rng)
+            for k in kinds:
+                seats[k] = seats.get(k, 0) + 1
+            wins[kinds[win]] = wins.get(kinds[win], 0) + 1
+            duels += du
+        self.assertGreater(duels, 1500)                          # duels actually happen
+        for k in rules.ABILITIES:                                # loose band: 1500 games is noisy
+            self.assertTrue(0.7 < wins.get(k, 0) / seats[k] * 4 < 1.35, k)
 
 
 if __name__ == "__main__":

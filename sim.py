@@ -3,8 +3,11 @@
 the real rules engine; prints each ability's win rate (fair share = 1/players).
 
   python3 sim.py [games=20000] [players=4] [miniEvery=3] [seed=1]
+
+Duels are coin flips (like CPU-vs-CPU duels on the server); DUELS=0 turns them off.
 """
 import random
+import os
 import sys
 from collections import Counter
 
@@ -12,8 +15,8 @@ import rules
 
 KINDS = list(rules.ABILITIES)
 RANDOM_BOARDS = False
-import os
 FORCE = os.environ.get("FORCE_KIND")
+DUELS = os.environ.get("DUELS") != "0"
 BY_KIND = {k: [c for c, (a, _) in rules.CHAR_AB.items() if a == k] for k in KINDS}
 
 
@@ -22,13 +25,18 @@ def play(players, mini_every, rng):
     room = {"seats": [{"id": str(i), "char": rng.choice(BY_KIND[k]), "pos": 0, "spins": 0, "ladders": 0, "chutes": 0,
                        "charges": rules.START_CHARGES, "shield": False} for i, k in enumerate(kinds)],
             "current": 0, "turn": 0, "seq": 0, "round": 0, "status": "playing", "winner": None,
-            "abilities": True, "miniEvery": mini_every,
+            "abilities": True, "miniEvery": mini_every, "duels": DUELS,
             "board": rules.random_board(rng.getrandbits(32)) if RANDOM_BOARDS else rules.CLASSIC}
-    uses, minis = Counter(), 0
+    uses, minis, duels = Counter(), 0, 0
     while room["status"] == "playing" and room["turn"] < 4000:
         ev = rules.take_turn(room, cpu=True)
         if ev["ab"]:
             uses[ev["ab"]] += 1
+        if ev.get("duel"):                          # the duel runs first, then any minigame
+            a, d = ev["duel"]["a"], ev["duel"]["d"]
+            w = rules.duel_cpu_winner(room, a, d)
+            rules.resolve_duel(room, w, d if w == a else a, "show")
+            duels += 1
         if ev.get("mini") and room["status"] == "playing":
             room["mini"] = {"kind": rules.pick_minigame(room)}
             minis += 1
@@ -36,7 +44,7 @@ def play(players, mini_every, rng):
     if room["winner"] is None:
         raise RuntimeError(f"stalled game: {room['board']} {[(s['char'], s['pos']) for s in room['seats']]}")
     win = next(i for i, s in enumerate(room["seats"]) if s["id"] == room["winner"])
-    return kinds, win, room["turn"], uses, minis
+    return kinds, win, room["turn"], uses, minis, duels
 
 
 def main():
@@ -51,19 +59,21 @@ def main():
     mini_every, seed = int(a[2] if a[2] is not None else 3), int(a[3] or 1)
     rules.RNG = random.Random(seed)
     rng = random.Random(seed + 1)
-    seats, wins, uses_all, turns, minis = Counter(), Counter(), Counter(), 0, 0
+    seats, wins, uses_all, turns, minis, duels = Counter(), Counter(), Counter(), 0, 0, 0
     lengths = []
     for _ in range(games):
-        kinds, win, t, uses, m = play(players, mini_every, rng)
+        kinds, win, t, uses, m, du = play(players, mini_every, rng)
         seats.update(kinds)
         wins[kinds[win]] += 1
         uses_all.update(uses)
         turns += t
         lengths.append(t / players)
         minis += m
+        duels += du
     fair = 1 / players
     print(f"{games} games, {players} players, minigame every {mini_every} rounds: "
-          f"{turns / games / players:.1f} turns per player, {minis / games:.1f} minigames per game")
+          f"{turns / games / players:.1f} turns per player, {minis / games:.1f} minigames per game, "
+          f"{duels / games:.1f} duels per game")
     lengths.sort()
     print("  turns/player p50 %.0f p90 %.0f p99 %.0f max %.0f" % (tuple(lengths[int(len(lengths) * q)] for q in (.5, .9, .99)) + (lengths[-1],)))
     for k in KINDS:
